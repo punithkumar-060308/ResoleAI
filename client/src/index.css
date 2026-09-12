@@ -27,6 +27,87 @@
   transform: translateY(-1px);
 }
 
+.page-transition,
+.chat-page-enter,
+.approval-page-enter,
+.profiles-page-enter,
+.knowledge-page-enter,
+.analytics-page-enter,
+.analytics-section-enter,
+.profile-detail-enter,
+.profile-empty-enter,
+.knowledge-empty-enter,
+.approval-empty-enter,
+.approval-item-enter,
+.chat-message-enter,
+.pipeline-step-enter {
+  animation: resolve-enter 360ms ease-out both;
+}
+
+.analytics-stagger {
+  animation: resolve-enter 360ms ease-out both;
+  animation-delay: var(--stagger-delay, 0ms);
+}
+
+.chat-message-enter,
+.pipeline-step-enter,
+.approval-item-enter {
+  animation-duration: 280ms;
+}
+
+@keyframes resolve-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-enter {
+  animation: dashboard-enter 420ms ease-out both;
+}
+
+.dashboard-stagger {
+  animation: dashboard-enter 420ms ease-out both;
+  animation-delay: var(--stagger-delay, 0ms);
+}
+
+@keyframes dashboard-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-enter,
+  .dashboard-stagger,
+  .page-transition,
+  .chat-page-enter,
+  .approval-page-enter,
+  .profiles-page-enter,
+  .knowledge-page-enter,
+  .analytics-page-enter,
+  .analytics-section-enter,
+  .analytics-stagger,
+  .profile-detail-enter,
+  .profile-empty-enter,
+  .knowledge-empty-enter,
+  .approval-empty-enter,
+  .approval-item-enter,
+  .chat-message-enter,
+  .pipeline-step-enter {
+    animation: none;
+  }
+}
+
 .pulse-glow {
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.35);
 }

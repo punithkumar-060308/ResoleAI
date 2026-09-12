@@ -34,39 +34,41 @@ export default function App() {
       />
 
       <main className="flex-1 pb-12">
-        {activeTab === 'dashboard' && (
-          <DashboardOverview onSelectTicket={handleSelectTicket} />
-        )}
+        <div key={activeTab} className="page-transition">
+          {activeTab === 'dashboard' && (
+            <DashboardOverview onSelectTicket={handleSelectTicket} />
+          )}
 
-        {activeTab === 'chat' && (
-          <CustomerChat onTicketCreated={handleTicketCreatedFromChat} />
-        )}
+          {activeTab === 'chat' && (
+            <CustomerChat onTicketCreated={handleTicketCreatedFromChat} />
+          )}
 
-        {activeTab === 'detail' && selectedTicketId && (
-          <TicketDetailView
-            ticketId={selectedTicketId}
-            onBack={() => {
-              setSelectedTicketId(null);
-              setActiveTab('dashboard');
-            }}
-          />
-        )}
+          {activeTab === 'detail' && selectedTicketId && (
+            <TicketDetailView
+              ticketId={selectedTicketId}
+              onBack={() => {
+                setSelectedTicketId(null);
+                setActiveTab('dashboard');
+              }}
+            />
+          )}
 
-        {activeTab === 'approval' && (
-          <ApprovalConsole onSelectTicket={handleSelectTicket} />
-        )}
+          {activeTab === 'approval' && (
+            <ApprovalConsole onSelectTicket={handleSelectTicket} />
+          )}
 
-        {activeTab === 'users' && (
-          <UserProfileManager onSelectUserForChat={() => setActiveTab('chat')} />
-        )}
+          {activeTab === 'users' && (
+            <UserProfileManager onSelectUserForChat={() => setActiveTab('chat')} />
+          )}
 
-        {activeTab === 'knowledge' && (
-          <KnowledgeBaseExplorer />
-        )}
+          {activeTab === 'knowledge' && (
+            <KnowledgeBaseExplorer />
+          )}
 
-        {activeTab === 'analytics' && (
-          <AnalyticsHub />
-        )}
+          {activeTab === 'analytics' && (
+            <AnalyticsHub />
+          )}
+        </div>
       </main>
 
       {/* Footer */}
