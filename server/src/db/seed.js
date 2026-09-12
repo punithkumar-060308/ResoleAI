@@ -36,7 +36,7 @@ export function seedDatabase() {
         phone: "+91 97788 11223",
         tier: "Platinum",
         lifetime_value: 295000,
-        risk_score: "Low",
+        risk_score: "High",
         joined_date: "2022-09-01",
         avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
         total_orders: 42,
@@ -211,6 +211,69 @@ export function seedDatabase() {
       }
     ],
 
+    knowledge_articles: [
+      {
+        id: "KB-101",
+        code: "KB_REFUND_DUPLICATE",
+        title: "Duplicate Payment Auto-Refund Standard Operating Procedure",
+        category: "Billing",
+        source: "Financial Governance Docs v4.1",
+        summary: "Detailed criteria for identifying Razorpay retry race conditions and processing instant ledger reversal.",
+        content: "When two distinct transaction IDs exist for a single order reference within 15 minutes, system must flag payment 2 for 100% refund. Financial amounts > ₹2,000 require human supervisor signoff."
+      },
+      {
+        id: "KB-102",
+        code: "KB_LOGISTICS_SLA",
+        title: "Logistics Partner SLA Breach & Escalation Handbook",
+        category: "Logistics",
+        source: "Carrier Operations Handbook 2026",
+        summary: "SLA compensation vouchers and regional hub priority dispatch escalation workflows.",
+        content: "Delays > 3 days qualify for ₹500 courtesy voucher. Delays > 5 days require mandatory Priority 1 dispatch escalation to SwiftLogistics Regional Manager."
+      },
+      {
+        id: "KB-103",
+        code: "KB_TECH_CHECKOUT_CRASH",
+        title: "Checkout Page Crash Troubleshooting Guide (Bug #BUG-404)",
+        category: "Technical",
+        source: "Engineering Incident KB #INC-8890",
+        summary: "Known issue: App crashes on checkout screen when Razorpay SDK initialization fails on older mobile webviews.",
+        content: "Fix for Bug #BUG-404: 1. Instruct user to clear app cache or update to v4.2.1. 2. Automatically grant 100 bonus reward points as inconvenience compensation. No supervisor approval needed."
+      },
+      {
+        id: "KB-104",
+        code: "KB_SECURITY_ACCOUNT_TAKEOVER",
+        title: "Account Security & Email Takeover Escalation Protocol",
+        category: "Security",
+        source: "InfoSec Compliance Standard v2.0",
+        summary: "High-risk protocol for unauthorized email modifications and suspicious foreign IP logins.",
+        content: "If account email change is requested immediately following an unrecognized foreign IP login, IMMEDIATELY freeze sensitive actions, flag HIGH RISK, and route to Security Desk."
+      }
+    ],
+
+    technical_issues: [
+      {
+        id: "BUG-404",
+        component: "Mobile Checkout Webview",
+        affected_version: "v4.1.0",
+        known_fix: "Upgrade to v4.2.1 or clear app cache & cookies",
+        workaround: "Use mobile browser or Web Checkout link",
+        status: "PATCH_AVAILABLE"
+      }
+    ],
+
+    account_security_events: [
+      {
+        id: "SEC-9901",
+        customer_id: "C1026",
+        event_type: "UNRECOGNIZED_FOREIGN_IP_LOGIN",
+        ip_address: "185.220.101.5",
+        location: "Moscow, Russia",
+        flagged_action: "EMAIL_CHANGE_REQUEST",
+        timestamp: "2026-09-12T19:10:00Z",
+        risk_rating: "CRITICAL"
+      }
+    ],
+
     tickets: [
       {
         id: "T-9001",
@@ -222,34 +285,40 @@ export function seedDatabase() {
         status: "INVESTIGATING",
         priority: "URGENT",
         risk_level: "HIGH",
+        category: "BILLING",
         intent: "DUPLICATE_PAYMENT_AND_DELIVERY_DELAY",
+        specialist_agent: "Billing Agent",
         created_at: "2026-09-12T18:00:00Z"
       },
       {
-        id: "T-9002",
+        id: "T-9004",
         customer_id: "C1025",
         order_id: "ORD9105",
-        channel: "Email",
-        subject: "Size exchange request for Merino Wool Jacket",
-        customer_message: "The wool jacket delivered today is size M, but I need size L. How do I exchange it?",
+        channel: "Chat Widget",
+        subject: "Checkout page keeps crashing",
+        customer_message: "My app crashes whenever I open checkout to place an order.",
         status: "OPEN",
         priority: "MEDIUM",
         risk_level: "LOW",
-        intent: "PRODUCT_EXCHANGE",
-        created_at: "2026-09-12T15:30:00Z"
+        category: "TECHNICAL",
+        intent: "CHECKOUT_APP_CRASH",
+        specialist_agent: "Technical Support Agent",
+        created_at: "2026-09-12T19:30:00Z"
       },
       {
-        id: "T-9003",
+        id: "T-9005",
         customer_id: "C1026",
         order_id: "ORD8990",
         channel: "Chat Widget",
-        subject: "Tracking query for Smart Watch",
-        customer_message: "Can you confirm if my watch will arrive by tomorrow evening?",
-        status: "RESOLVED",
-        priority: "LOW",
-        risk_level: "LOW",
-        intent: "DELIVERY_STATUS_CHECK",
-        created_at: "2026-09-12T11:20:00Z"
+        subject: "Unauthorized email change alert",
+        customer_message: "I think someone changed my account email without my permission.",
+        status: "PENDING_APPROVAL",
+        priority: "URGENT",
+        risk_level: "HIGH",
+        category: "ACCOUNT_SECURITY",
+        intent: "ACCOUNT_TAKEOVER_ALERT",
+        specialist_agent: "Account & Security Agent",
+        created_at: "2026-09-12T19:45:00Z"
       }
     ],
 
@@ -269,5 +338,5 @@ export function seedDatabase() {
   };
 
   db.reset(seedData);
-  console.log('Database successfully seeded with enterprise dataset.');
+  console.log('Database successfully seeded with expanded Track 2 dataset (Knowledge + Tech + Security + 3 Demo Cases).');
 }

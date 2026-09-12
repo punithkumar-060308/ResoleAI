@@ -2,7 +2,7 @@ import { db } from '../db/database.js';
 
 export class QwenService {
   /**
-   * Run Qwen Reasoning Engine on a customer ticket and evidence package.
+   * Run Qwen Reasoning Engine on a customer ticket and multi-agent evidence package.
    * @param {Object} context - { ticket, customer, order, payments, support_history, investigation }
    */
   static async analyzeAndReason(context) {
@@ -56,7 +56,7 @@ export class QwenService {
       ticket_id: ticket.id,
       actor: 'Qwen AI Reasoning Engine',
       action: 'REASONING_COMPLETED',
-      details: `Qwen analyzed evidence: Identified ${reasoningResult.issues.length} issues & ${reasoningResult.root_causes.length} root causes. Recommended ${reasoningResult.recommended_actions.length} actions. Needs Human Approval: ${reasoningResult.needs_human_approval}.`,
+      details: `Qwen analyzed evidence: Category: ${reasoningResult.category}. Identified ${reasoningResult.issues.length} issues & ${reasoningResult.root_causes.length} root causes. Needs Human Approval: ${reasoningResult.needs_human_approval}.`,
       timestamp: new Date().toISOString()
     });
 
@@ -66,19 +66,22 @@ export class QwenService {
   static localQwenReasoning(context) {
     const { ticket, customer, order, payments, investigation } = context;
     const msg = (ticket.customer_message || '').toLowerCase();
-    const hasDoubleCharge = msg.includes('twice') || msg.includes('double') || msg.includes('two times') || msg.includes('charged 2');
-    const hasDelay = msg.includes('arrived') || msg.includes('delay') || msg.includes('late') || msg.includes('tracking');
-    const hasPriorSupport = msg.includes('yesterday') || msg.includes('contacted') || msg.includes('before');
+    const category = ticket.category || 'GENERAL';
 
     const issues = [];
     const rootCauses = [];
     const evidenceSummary = [];
     const recommendedActions = [];
 
-    if (hasDoubleCharge || (investigation && investigation.contradiction_count > 0)) {
+    // --- CASE 1: BILLING & SLA BREACH (Demo 1) ---
+    if (category === 'BILLING' || msg.includes('charged') || msg.includes('twice')) {
       issues.push(`Duplicate payment charge for order ${order ? order.id : 'ORD9281'} (2x ₹4,999)`);
+      issues.push(`Shipment delayed by ${order ? order.delay_days : 6} days past SLA commitment`);
       rootCauses.push('Payment Gateway retry race condition created 2 valid success charges (PAY-9921 & PAY-9922).');
+      rootCauses.push(`Carrier (${order ? order.carrier : 'SwiftLogistics'}) sorting hub congestion in Bengaluru.`);
       evidenceSummary.push('Razorpay ledger reflects two ₹4,999 charges at 10:31:00Z and 10:31:05Z for single order.');
+      evidenceSummary.push(`Delivery SLA breached by ${order ? order.delay_days : 6} days.`);
+
       recommendedActions.push({
         action_id: `ACT_REF_${Date.now()}`,
         action_type: 'INITIATE_REFUND',
@@ -87,14 +90,9 @@ export class QwenService {
         amount: 4999,
         policy_code: 'POL-001',
         risk_level: 'HIGH',
-        reason: 'Duplicate transaction refund under Policy POL-001 (Auto-refund eligible, requires supervisor signoff >₹2,000)'
+        reason: 'Duplicate transaction refund under Policy POL-001 (Requires supervisor signoff >₹2,000)'
       });
-    }
 
-    if (hasDelay || (order && order.sla_breached)) {
-      issues.push(`Shipment delayed by ${order ? order.delay_days : 6} days past SLA commitment`);
-      rootCauses.push(`Carrier (${order ? order.carrier : 'SwiftLogistics'}) sorting hub congestion in Bengaluru.`);
-      evidenceSummary.push(`Delivery SLA was promised for ${order ? new Date(order.expected_delivery).toLocaleDateString() : 'Sep 6, 2026'}. Current status: Transit Backlog.`);
       recommendedActions.push({
         action_id: `ACT_SLA_${Date.now()}`,
         action_type: 'ISSUE_COMPENSATION',
@@ -105,6 +103,7 @@ export class QwenService {
         risk_level: 'LOW',
         reason: 'SLA breach compensation voucher under Policy POL-002'
       });
+
       recommendedActions.push({
         action_id: `ACT_ESC_${Date.now()}`,
         action_type: 'LOGISTICS_ESCALATION',
@@ -115,34 +114,105 @@ export class QwenService {
         risk_level: 'LOW',
         reason: 'Escalate to Regional Carrier Operations Manager under Policy POL-004'
       });
+
+      const needsHuman = true;
+      const cName = customer ? customer.name.split(' ')[0] : 'Valued Customer';
+      const responseText = `Hi ${cName}, we identified two successful ₹4,999 payments against order ${order ? order.id : 'ORD9281'} and confirmed a 6-day delivery delay with ${order ? order.carrier : 'SwiftLogistics'}. We have flagged the duplicate payment for refund approval, issued a ₹500 SLA courtesy voucher, and escalated your shipment for priority dispatch.`;
+
+      return {
+        category: 'BILLING',
+        intent: 'DUPLICATE_PAYMENT_AND_DELIVERY_DELAY',
+        urgency: 'HIGH',
+        sentiment: 'FRUSTRATED',
+        issues,
+        root_causes: rootCauses,
+        evidence_summary: evidenceSummary,
+        recommended_actions: recommendedActions,
+        risk_level: 'HIGH',
+        needs_human_approval: needsHuman,
+        human_approval_reason: 'Refund amount (₹4,999) exceeds Policy POL-003 threshold (₹2,000) and contains multi-system data contradiction.',
+        customer_response: responseText
+      };
     }
 
-    if (hasPriorSupport) {
-      issues.push('Unresolved prior customer support ticket (T-8820 closed prematurely)');
-      rootCauses.push('Legacy bot closed previous ticket without checking cross-system billing/shipping state.');
-      evidenceSummary.push('Ticket T-8820 rated 1/5 stars by customer after standard generic auto-reply.');
+    // --- CASE 2: TECHNICAL SUPPORT (Demo 2) ---
+    if (category === 'TECHNICAL' || msg.includes('crash') || msg.includes('app')) {
+      issues.push('Checkout webview crash incident on mobile application');
+      rootCauses.push('Known bug #BUG-404: Razorpay SDK iframe initialization crash on mobile webview v122.');
+      evidenceSummary.push('Engineering Incident KB #INC-8890 confirms patch v4.2.1 resolves checkout crash.');
+
+      recommendedActions.push({
+        action_id: `ACT_TECH_${Date.now()}`,
+        action_type: 'GRANT_REWARD_POINTS',
+        title: 'Grant 100 Inconvenience Reward Points',
+        target_reference: customer ? customer.id : 'C1025',
+        amount: 100,
+        policy_code: 'KB-103',
+        risk_level: 'LOW',
+        reason: 'Inconvenience courtesy points under Technical Patch Policy KB-103'
+      });
+
+      const cName = customer ? customer.name.split(' ')[0] : 'Valued Customer';
+      const responseText = `Hi ${cName}, thank you for reporting the checkout issue. Our engineering team identified a known mobile webview bug (#BUG-404). Please update your app to v4.2.1 or clear app cache to resolve the crash instantly. We have also credited 100 reward points to your account!`;
+
+      return {
+        category: 'TECHNICAL',
+        intent: 'APP_CHECKOUT_CRASH',
+        urgency: 'MEDIUM',
+        sentiment: 'CONCERNED',
+        issues,
+        root_causes: rootCauses,
+        evidence_summary: evidenceSummary,
+        recommended_actions: recommendedActions,
+        risk_level: 'LOW',
+        needs_human_approval: false,
+        human_approval_reason: 'All technical troubleshooting actions fall within low-risk automated parameters.',
+        customer_response: responseText
+      };
     }
 
-    const needsHuman = recommendedActions.some(a => a.risk_level === 'HIGH' || a.amount > 2000) || (investigation && investigation.contradiction_count > 0);
+    // --- CASE 3: ACCOUNT & SECURITY ALERT (Demo 3) ---
+    if (category === 'ACCOUNT_SECURITY' || msg.includes('email') || msg.includes('permission') || msg.includes('hacked')) {
+      issues.push('Unauthorized primary email modification request');
+      issues.push('Unrecognized foreign IP login from Moscow, Russia (185.220.101.5)');
+      rootCauses.push('Account Takeover & credential stuffing attack indicator flagged by InfoSec.');
+      evidenceSummary.push('Security Event SEC-9901: Critical threat rating on customer account C1026.');
 
-    const cName = customer ? customer.name.split(' ')[0] : 'Valued Customer';
-    const responseText = `Dear ${cName}, thank you for bringing this to our attention. We sincerely apologize for the experience. Our investigation confirmed a duplicate charge of ₹4,999 for order ${order ? order.id : 'ORD9281'}, which has been submitted for immediate refund to your payment source. Additionally, due to the delivery delay with ${order ? order.carrier : 'SwiftLogistics'}, we have issued a ₹500 compensation voucher to your account and escalated your shipment for priority dispatch.`;
+      recommendedActions.push({
+        action_id: `ACT_SEC_${Date.now()}`,
+        action_type: 'LOCK_ACCOUNT_SENSITIVE_ACTIONS',
+        title: 'Lock Sensitive Account Modifications',
+        target_reference: customer ? customer.id : 'C1026',
+        amount: 0,
+        policy_code: 'KB-104',
+        risk_level: 'HIGH',
+        reason: 'InfoSec protocol KB-104: Freeze email/password modifications and mandate Human Security Desk verification.'
+      });
 
-    return {
-      intent: 'DUPLICATE_PAYMENT_AND_DELIVERY_DELAY',
-      urgency: 'HIGH',
-      sentiment: 'FRUSTRATED',
-      issues,
-      root_causes: rootCauses,
-      evidence_summary: evidenceSummary,
-      recommended_actions: recommendedActions,
-      risk_level: needsHuman ? 'HIGH' : 'LOW',
-      needs_human_approval: needsHuman,
-      human_approval_reason: needsHuman 
-        ? 'Refund amount (₹4,999) exceeds Policy POL-003 threshold (₹2,000) and contains multi-system data contradiction.'
-        : 'All actions fall within low-risk automated thresholds.',
-      customer_response: responseText
-    };
+      const cName = customer ? customer.name.split(' ')[0] : 'Valued Customer';
+      const responseText = `Hi ${cName}, security is our top priority. We detected an unrecognized login attempt on your account from a foreign location and immediately locked all sensitive profile changes to protect your data. A senior Security Specialist is reviewing your account context right now to assist you securely.`;
+
+      return {
+        category: 'ACCOUNT_SECURITY',
+        intent: 'UNAUTHORIZED_ACCOUNT_CHANGE',
+        urgency: 'URGENT',
+        sentiment: 'FRUSTRATED',
+        issues,
+        root_causes: rootCauses,
+        evidence_summary: evidenceSummary,
+        recommended_actions: recommendedActions,
+        risk_level: 'HIGH',
+        needs_human_approval: true,
+        human_approval_reason: 'Critical Account Security Threat: Mandates immediate Security Desk supervisor review.',
+        customer_response: responseText
+      };
+    }
+
+    // Default Fallback
+    return QwenService.localQwenReasoning({
+      ...context,
+      ticket: { ...context.ticket, category: 'BILLING' }
+    });
   }
 
   static async callQwenApi(endpoint, apiKey, context) {
@@ -152,14 +222,14 @@ Analyze the following customer support request and multi-source enterprise evide
 CUSTOMER: ${JSON.stringify(context.customer)}
 TICKET: ${JSON.stringify(context.ticket)}
 ORDER: ${JSON.stringify(context.order)}
-PAYMENTS: ${JSON.stringify(context.payments)}
 INVESTIGATION EVIDENCE: ${JSON.stringify(context.investigation)}
 
 Return JSON with:
 {
+  "category": string,
   "intent": string,
-  "urgency": "LOW"|"MEDIUM"|"HIGH",
-  "sentiment": "NEUTRAL"|"FRUSTRATED"|"SATISFIED",
+  "urgency": "LOW"|"MEDIUM"|"HIGH"|"URGENT",
+  "sentiment": "NEUTRAL"|"FRUSTRATED"|"CONCERNED",
   "issues": string[],
   "root_causes": string[],
   "evidence_summary": string[],

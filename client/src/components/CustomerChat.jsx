@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Bot, User, Sparkles, CheckCircle2, ShieldAlert, AlertTriangle, ArrowRight, RefreshCw } from 'lucide-react';
+import { Send, Bot, User, Sparkles, CheckCircle2, ShieldAlert, Cpu, Lock, RefreshCw } from 'lucide-react';
 
 export default function CustomerChat({ onTicketCreated }) {
   const [inputMessage, setInputMessage] = useState('');
@@ -7,26 +7,57 @@ export default function CustomerChat({ onTicketCreated }) {
   const [messages, setMessages] = useState([
     {
       sender: 'bot',
-      text: 'Hello Aarav! Welcome to Customer Care. How can I assist you with your account or recent orders today?',
+      text: 'Hello! Welcome to Customer Care. How can I assist you with your account, orders, or technical queries today?',
       time: '18:00'
     }
   ]);
   const [executionSteps, setExecutionSteps] = useState([]);
 
-  const KILLER_DEMO_TEXT = "My order hasn't arrived and I was charged twice. I already contacted support yesterday.";
+  const DEMO_CASES = [
+    {
+      id: 'demo1',
+      title: 'Demo 1: Billing & SLA Breach',
+      customer_id: 'C1024',
+      name: 'Aarav Sharma',
+      text: "My order hasn't arrived and I was charged twice. I already contacted support yesterday."
+    },
+    {
+      id: 'demo2',
+      title: 'Demo 2: Technical Checkout Crash',
+      customer_id: 'C1025',
+      name: 'Priya Nair',
+      text: "My app crashes whenever I open checkout to place an order."
+    },
+    {
+      id: 'demo3',
+      title: 'Demo 3: Account Security Alert',
+      customer_id: 'C1026',
+      name: 'Rohan Verma',
+      text: "I think someone changed my account email without my permission."
+    }
+  ];
 
-  const handleSend = async (textToSend) => {
-    const text = textToSend || inputMessage;
+  const handleSend = async (demoCase) => {
+    let text = inputMessage;
+    let customerId = 'C1024';
+    let customerName = 'Aarav Sharma';
+
+    if (demoCase) {
+      text = demoCase.text;
+      customerId = demoCase.customer_id;
+      customerName = demoCase.name;
+    }
+
     if (!text.trim() || loading) return;
 
     // Add user message to chat
-    const userMsg = { sender: 'user', text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+    const userMsg = { sender: 'user', text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), customerName };
     setMessages(prev => [...prev, userMsg]);
-    if (!textToSend) setInputMessage('');
+    if (!demoCase) setInputMessage('');
 
     setLoading(true);
     setExecutionSteps([
-      { title: 'Ingesting Complaint', status: 'active', desc: 'Identifying customer profile C1024 (Aarav Sharma - VIP Gold)...' }
+      { title: 'Intelligent Ticket Router', status: 'active', desc: `Analyzing intent & sentiment for ${customerName} (${customerId})...` }
     ]);
 
     try {
@@ -35,7 +66,7 @@ export default function CustomerChat({ onTicketCreated }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          customer_id: 'C1024',
+          customer_id: customerId,
           customer_message: text,
           channel: 'Chat Widget'
         })
@@ -46,10 +77,10 @@ export default function CustomerChat({ onTicketCreated }) {
       // Update step 2
       setExecutionSteps(prev => [
         ...prev.map(s => ({ ...s, status: 'done' })),
-        { title: 'Multi-Source Investigation', status: 'active', desc: 'Gathering CRM, Orders (ORD9281), Razorpay Payments, Support History & Policies...' }
+        { title: 'Multi-Agent Investigation Engine', status: 'active', desc: 'Querying Billing, Order, Technical & Security Specialist Agents...' }
       ]);
 
-      await new Promise(r => setTimeout(r, 900));
+      await new Promise(r => setTimeout(r, 800));
 
       // 2. Trigger Workflow Investigation
       const invRes = await fetch('/api/investigations', {
@@ -58,28 +89,31 @@ export default function CustomerChat({ onTicketCreated }) {
         body: JSON.stringify({ ticket_id: ticketId })
       });
       const invData = await invRes.json();
+      const routing = invData.data?.investigation?.routing_info;
 
       setExecutionSteps(prev => [
         ...prev.map(s => ({ ...s, status: 'done' })),
-        { title: 'Contradiction & Evidence Engine', status: 'active', desc: 'FLAGGED: Duplicate payment ₹4,999 (PAY-9921 & PAY-9922) + Delivery SLA breach (6 days delay).' }
+        { title: 'Knowledge Reasoning Engine', status: 'active', desc: `Assigned: ${routing?.specialist_agent || 'Specialist Agent'}. Matched KB rules & policies.` }
       ]);
 
-      await new Promise(r => setTimeout(r, 900));
+      await new Promise(r => setTimeout(r, 800));
 
       setExecutionSteps(prev => [
         ...prev.map(s => ({ ...s, status: 'done' })),
-        { title: 'Qwen AI Root Cause Reasoning', status: 'active', desc: 'Root Cause: Gateway retry race condition & Logistics hub backlog. Generated 3 resolution actions.' }
+        { title: 'Qwen AI Root Cause Analysis', status: 'active', desc: 'Extracted root causes & formulated context-aware resolution.' }
       ]);
 
-      await new Promise(r => setTimeout(r, 900));
+      await new Promise(r => setTimeout(r, 800));
+
+      const isHighRisk = invData.data?.investigation?.calculated_risk === 'HIGH';
 
       setExecutionSteps(prev => [
         ...prev.map(s => ({ ...s, status: 'done' })),
-        { title: 'EnterPro Workflow & Risk Check', status: 'done', desc: 'Risk: HIGH (Refund ₹4,999). Routed to Human Supervisor Approval Queue.' }
+        { title: 'EnterPro Action & Risk Check', status: 'done', desc: isHighRisk ? 'Risk: HIGH -> Routed to Human Supervisor Approval.' : 'Risk: LOW -> Safe action auto-executed & resolved.' }
       ]);
 
       const recOutput = invData.data.recommendation?.reasoning_output;
-      const botResponseText = recOutput?.customer_response || "Our investigation confirmed a duplicate charge of ₹4,999 for order ORD9281, which has been submitted for immediate refund. Additionally, due to delivery SLA delay, we have escalated your order to logistics and issued a ₹500 store credit voucher.";
+      const botResponseText = recOutput?.customer_response || "Our investigation has analyzed your request and initiated resolution.";
 
       setMessages(prev => [
         ...prev,
@@ -88,7 +122,7 @@ export default function CustomerChat({ onTicketCreated }) {
           text: botResponseText,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           ticketId,
-          badge: 'HIGH RISK — Supervisor Review Requested'
+          badge: isHighRisk ? 'HIGH RISK — Human Review Requested' : 'AUTO-RESOLVED — Low Risk Action Completed'
         }
       ]);
 
@@ -97,14 +131,6 @@ export default function CustomerChat({ onTicketCreated }) {
       }
     } catch (err) {
       console.error('Error sending message:', err);
-      setMessages(prev => [
-        ...prev,
-        {
-          sender: 'bot',
-          text: 'An error occurred while connecting to the investigation engine. Please check backend status.',
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
     } finally {
       setLoading(false);
     }
@@ -130,18 +156,9 @@ export default function CustomerChat({ onTicketCreated }) {
                 ResolveAI Customer Support
                 <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">Live</span>
               </h3>
-              <p className="text-xs text-slate-400">Authenticated: Aarav Sharma (C1024 - VIP Gold)</p>
+              <p className="text-xs text-slate-400">Autonomous Multi-Agent Intelligence</p>
             </div>
           </div>
-          
-          <button
-            onClick={() => handleSend(KILLER_DEMO_TEXT)}
-            disabled={loading}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-medium transition-all"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Load Demo Complaint</span>
-          </button>
         </div>
 
         {/* Messages Body */}
@@ -159,7 +176,7 @@ export default function CustomerChat({ onTicketCreated }) {
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[11px] font-semibold opacity-70 flex items-center gap-1">
                     {m.sender === 'user' ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3 text-blue-400" />}
-                    {m.sender === 'user' ? 'Aarav Sharma' : 'ResolveAI System'}
+                    {m.sender === 'user' ? (m.customerName || 'Customer') : 'ResolveAI System'}
                   </span>
                   <span className="text-[10px] opacity-50">{m.time}</span>
                 </div>
@@ -168,12 +185,14 @@ export default function CustomerChat({ onTicketCreated }) {
 
                 {m.badge && (
                   <div className="mt-3 pt-2 border-t border-slate-700/50 flex items-center justify-between">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
-                      <ShieldAlert className="w-3 h-3 text-amber-400" />
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border flex items-center gap-1 ${
+                      m.badge.includes('HIGH') ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                    }`}>
+                      <ShieldAlert className="w-3 h-3" />
                       {m.badge}
                     </span>
                     {m.ticketId && (
-                      <span className="text-[10px] text-slate-400">Ref: {m.ticketId}</span>
+                      <span className="text-[10px] text-slate-400 font-mono">Ref: {m.ticketId}</span>
                     )}
                   </div>
                 )}
@@ -184,7 +203,7 @@ export default function CustomerChat({ onTicketCreated }) {
           {loading && (
             <div className="flex items-center space-x-2 text-slate-400 text-xs italic p-3 glass-panel rounded-xl max-w-[60%]">
               <RefreshCw className="w-4 h-4 animate-spin text-blue-400" />
-              <span>Multi-Source Intelligence engine investigating customer ticket...</span>
+              <span>Multi-Agent Engine investigating customer request...</span>
             </div>
           )}
         </div>
@@ -196,7 +215,7 @@ export default function CustomerChat({ onTicketCreated }) {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Type your complaint here (or click 'Load Demo Complaint' above)..."
+            placeholder="Type your complaint here or select a Demo Case on the right..."
             className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
           />
           <button
@@ -211,68 +230,64 @@ export default function CustomerChat({ onTicketCreated }) {
 
       </div>
 
-      {/* Right Live Execution Pipeline Monitor */}
+      {/* Right Column: Demo Cases & Pipeline Monitor */}
       <div className="lg:col-span-5 flex flex-col space-y-4">
         
+        {/* Preset Demo Cases Buttons */}
+        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
+          <h3 className="font-extrabold text-sm text-slate-100 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-indigo-400" />
+            <span>Select Track 2 Demo Scenario</span>
+          </h3>
+
+          <div className="space-y-2">
+            {DEMO_CASES.map((d) => (
+              <button
+                key={d.id}
+                onClick={() => handleSend(d)}
+                disabled={loading}
+                className="w-full text-left p-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/40 text-xs transition-all group"
+              >
+                <div className="flex items-center justify-between font-bold text-slate-200 mb-0.5">
+                  <span className="group-hover:text-indigo-300">{d.title}</span>
+                  <span className="text-[10px] text-slate-400 font-normal">{d.name}</span>
+                </div>
+                <p className="text-[11px] text-slate-400 italic truncate">"{d.text}"</p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Live Execution Steps Monitor */}
         <div className="glass-panel p-5 rounded-2xl border border-slate-800">
           <h3 className="font-bold text-sm text-slate-100 flex items-center gap-2 mb-3">
-            <Sparkles className="w-4 h-4 text-blue-400" />
+            <Cpu className="w-4 h-4 text-blue-400" />
             <span>Autonomous Pipeline Monitor</span>
           </h3>
-          <p className="text-xs text-slate-400 mb-4">
-            Watch ResolveAI perform multi-source data ingestion, Qwen reasoning, and EnterPro risk check in real time.
-          </p>
 
           {executionSteps.length === 0 ? (
-            <div className="p-8 text-center border border-dashed border-slate-800 rounded-xl bg-slate-900/30">
-              <Bot className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-              <p className="text-xs text-slate-400 font-medium">No active workflow running.</p>
-              <p className="text-[11px] text-slate-500 mt-1">Send a message or click "Load Demo Complaint" to trigger live execution.</p>
+            <div className="p-6 text-center border border-dashed border-slate-800 rounded-xl bg-slate-900/30 text-xs text-slate-400">
+              Click any demo scenario button above to watch ResolveAI run in real time.
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {executionSteps.map((step, idx) => (
-                <div
-                  key={idx}
-                  className={`p-3 rounded-xl border text-xs transition-all ${
-                    step.status === 'active'
-                      ? 'bg-blue-950/40 border-blue-500/40 text-blue-200'
-                      : 'bg-slate-900/60 border-slate-800 text-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center justify-between font-semibold mb-1">
+                <div key={idx} className="p-2.5 rounded-xl border text-xs bg-slate-900/60 border-slate-800">
+                  <div className="flex items-center justify-between font-bold text-slate-200">
                     <span className="flex items-center gap-2">
                       {step.status === 'done' ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                       ) : (
-                        <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />
+                        <RefreshCw className="w-3.5 h-3.5 text-blue-400 animate-spin" />
                       )}
                       {step.title}
                     </span>
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Step {idx + 1}</span>
                   </div>
-                  <p className="text-[11px] opacity-80 pl-6">{step.desc}</p>
+                  <p className="text-[11px] text-slate-400 pl-5.5 mt-0.5">{step.desc}</p>
                 </div>
               ))}
             </div>
           )}
-        </div>
-
-        {/* Quick Demo Case Card */}
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/80 to-slate-950">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Killer Demo Scenario</span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">Pre-loaded</span>
-          </div>
-          <p className="text-xs text-slate-300 italic mb-3">
-            "My order hasn't arrived and I was charged twice. I already contacted support yesterday."
-          </p>
-          <div className="space-y-1.5 text-[11px] text-slate-400 border-t border-slate-800/80 pt-3">
-            <div className="flex justify-between"><span>Customer:</span> <strong className="text-slate-200">Aarav Sharma (C1024)</strong></div>
-            <div className="flex justify-between"><span>Target Order:</span> <strong className="text-slate-200">ORD9281 (Headphones Pro)</strong></div>
-            <div className="flex justify-between"><span>Billing Flag:</span> <strong className="text-amber-400 font-bold">2x ₹4,999 (Duplicate Debit)</strong></div>
-            <div className="flex justify-between"><span>Logistics SLA:</span> <strong className="text-rose-400 font-bold">6 Days Delayed</strong></div>
-          </div>
         </div>
 
       </div>

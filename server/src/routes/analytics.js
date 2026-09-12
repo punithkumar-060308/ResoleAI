@@ -33,8 +33,8 @@ router.get('/', (req, res) => {
   const rootCausesBreakdown = [
     { cause: 'Payment Gateway Retry Double-Debit', count: 14, percentage: 38 },
     { cause: 'Logistics Sorting Hub SLA Breach (>3 days)', count: 11, percentage: 30 },
-    { cause: 'Legacy Bot Premature Ticket Auto-Close', count: 8, percentage: 22 },
-    { cause: 'Address Modification Failure', count: 4, percentage: 10 }
+    { cause: 'Mobile Checkout Webview Crash (Bug #BUG-404)', count: 6, percentage: 18 },
+    { cause: 'Unauthorized Email Modification Attempt', count: 4, percentage: 14 }
   ];
 
   res.json({
@@ -43,6 +43,8 @@ router.get('/', (req, res) => {
       kpis: {
         total_tickets: totalTickets + 42,
         ai_resolution_rate: `${aiResolutionRate}%`,
+        first_contact_resolution_rate: '76%',
+        repeat_contact_rate: '14%',
         human_escalation_rate: `${humanEscalationRate}%`,
         avg_resolution_time_mins: 4.2,
         duplicate_payment_incidents: duplicatePaymentIncidents + 12,
@@ -54,8 +56,12 @@ router.get('/', (req, res) => {
       department_escalations: [
         { department: 'Logistics Operations', count: 12 },
         { department: 'Billing & Gateway Support', count: 9 },
-        { department: 'Risk & Compliance', count: 4 },
-        { department: 'Warehouse Fulfillment', count: 2 }
+        { department: 'InfoSec & Account Security', count: 4 },
+        { department: 'Engineering (App Crash)', count: 2 }
+      ],
+      retention_risk_signals: [
+        { customer: 'Aarav Sharma (C1024 - VIP Gold)', risk_level: 'HIGH_RETENTION_RISK', reason: 'Twin ₹4,999 debits + 6-day SLA breach + 1/5 rating on previous ticket T-8820' },
+        { customer: 'Rohan Verma (C1026 - Platinum)', risk_level: 'HIGH_SECURITY_RISK', reason: 'Unrecognized login from Moscow, Russia IP followed by email modification' }
       ],
       insight_spotlight: '23% of total delivery SLA complaints originated from SwiftLogistics Bengaluru Sorting Hub.'
     }

@@ -12,11 +12,12 @@ import {
   Clock, 
   Check, 
   X, 
-  Building2, 
+  BookOpen, 
   ExternalLink,
   Sparkles,
   RefreshCw,
-  Scale
+  Scale,
+  Cpu
 } from 'lucide-react';
 
 export default function TicketDetailView({ ticketId, onBack }) {
@@ -63,7 +64,7 @@ export default function TicketDetailView({ ticketId, onBack }) {
           ticket_id: ticketId,
           actions: actionsToExecute,
           supervisor_name: 'Human Supervisor (Admin)',
-          note: 'Verified duplicate charge in Razorpay ledger and logistics delay SLA breach.'
+          note: 'Verified evidence timeline, knowledge rules, and system logs.'
         })
       });
       const resJson = await res.json();
@@ -82,18 +83,17 @@ export default function TicketDetailView({ ticketId, onBack }) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center text-slate-400">
         <RefreshCw className="w-8 h-8 animate-spin mx-auto text-blue-500 mb-3" />
-        <p className="text-xs font-semibold">Gathering multi-source evidence and running Qwen reasoning engine...</p>
+        <p className="text-xs font-semibold">Running Intelligent Router, Multi-Agent Specialist Inquiry & Qwen Reasoning...</p>
       </div>
     );
   }
 
   const ticket = data?.ticket;
   const customer = data?.customer;
-  const order = data?.order;
-  const payments = data?.payments || [];
   const investigation = data?.investigation;
   const recommendation = data?.recommendation?.reasoning_output;
   const auditLogs = data?.audit_logs || [];
+  const routing = investigation?.routing_info || {};
 
   const isResolved = ticket?.status === 'RESOLVED';
 
@@ -119,6 +119,37 @@ export default function TicketDetailView({ ticketId, onBack }) {
           }`}>
             {ticket?.status}
           </span>
+        </div>
+      </div>
+
+      {/* Intelligent Ticket Router Classification Banner */}
+      <div className="glass-panel p-5 rounded-2xl border border-blue-500/30 bg-gradient-to-r from-blue-950/40 via-slate-900 to-slate-950 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center space-x-3.5">
+          <div className="p-3 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30">
+            <Cpu className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Intelligent Ticket Router</span>
+              <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                Assigned: {routing.specialist_agent || ticket?.specialist_agent || 'Billing Agent'}
+              </span>
+            </div>
+            <h3 className="text-base font-extrabold text-slate-100 mt-0.5">
+              Category: {routing.category || ticket?.category || 'BILLING'} • Priority: {routing.priority || ticket?.priority || 'P1'}
+            </h3>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-4 text-xs">
+          <div className="text-right">
+            <span className="text-slate-400 block text-[10px]">Escalation Probability</span>
+            <span className="font-extrabold text-amber-400 text-sm">{routing.escalation_probability || 85}%</span>
+          </div>
+          <div className="text-right border-l border-slate-800 pl-4">
+            <span className="text-slate-400 block text-[10px]">SLA Priority Target</span>
+            <span className="font-extrabold text-slate-200 text-sm">{routing.sla_priority_hours || 1} Hour</span>
+          </div>
         </div>
       </div>
 
@@ -158,7 +189,7 @@ export default function TicketDetailView({ ticketId, onBack }) {
 
           <div className="flex items-center justify-between mt-3 text-xs text-slate-400">
             <span>Ingestion Channel: <strong className="text-slate-200">{ticket?.channel}</strong></span>
-            <span>Target Order: <strong className="text-blue-400 font-mono">{ticket?.order_id}</strong></span>
+            <span>Target Order: <strong className="text-blue-400 font-mono">{ticket?.order_id || 'N/A'}</strong></span>
             <span>Created: <strong className="text-slate-200">{new Date(ticket?.created_at).toLocaleString()}</strong></span>
           </div>
         </div>
@@ -199,7 +230,7 @@ export default function TicketDetailView({ ticketId, onBack }) {
           <div className="glass-panel p-5 rounded-2xl border border-slate-800">
             <h3 className="font-extrabold text-sm text-slate-100 flex items-center gap-2 mb-4 border-b border-slate-800 pb-3">
               <FileText className="w-4 h-4 text-blue-400" />
-              <span>Multi-Source Investigation Evidence</span>
+              <span>Multi-Agent Evidence Package</span>
               <span className="ml-auto text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
                 {investigation?.evidence_package?.length || 0} Facts Verified
               </span>
@@ -232,24 +263,24 @@ export default function TicketDetailView({ ticketId, onBack }) {
             </div>
           </div>
 
-          {/* Applicable Policies Card */}
+          {/* Matched Knowledge Reasoning Articles */}
           <div className="glass-panel p-5 rounded-2xl border border-slate-800">
             <h3 className="font-extrabold text-sm text-slate-100 flex items-center gap-2 mb-4 border-b border-slate-800 pb-3">
-              <Scale className="w-4 h-4 text-indigo-400" />
-              <span>Matching Enterprise Rules & Policies</span>
+              <BookOpen className="w-4 h-4 text-indigo-400" />
+              <span>Knowledge Engine Matched Articles & Policies</span>
             </h3>
 
             <div className="space-y-3">
-              {investigation?.applicable_policies?.map((pol) => (
-                <div key={pol.id} className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 text-xs">
+              {investigation?.matched_knowledge?.map((k, idx) => (
+                <div key={idx} className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 text-xs">
                   <div className="flex items-center justify-between font-bold text-slate-200 mb-1">
-                    <span className="text-indigo-400 font-mono">{pol.code}</span>
+                    <span className="text-indigo-400 font-mono">{k.code || k.id}</span>
                     <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                      {pol.category}
+                      {k.category}
                     </span>
                   </div>
-                  <h4 className="font-bold text-slate-100">{pol.title}</h4>
-                  <p className="text-slate-400 text-[11px] mt-1">{pol.description}</p>
+                  <h4 className="font-bold text-slate-100">{k.title}</h4>
+                  <p className="text-slate-400 text-[11px] mt-1">{k.content}</p>
                 </div>
               ))}
             </div>
@@ -334,22 +365,16 @@ export default function TicketDetailView({ ticketId, onBack }) {
             </div>
 
             <p className="text-xs text-slate-300 mb-4 leading-relaxed">
-              {recommendation?.human_approval_reason || "Refund amount exceeds auto-approval policy threshold."}
+              {recommendation?.human_approval_reason || "Action requires supervisor verification under risk governance policies."}
             </p>
 
             {isResolved || executionSuccess ? (
               <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center space-x-2">
                 <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                <span>Actions verified & executed! ₹4,999 refund initiated via Razorpay and ₹500 voucher issued to Aarav Sharma.</span>
+                <span>Actions verified & executed! Resolutions communicated to customer with audit trail logged.</span>
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-[11px] text-slate-300 space-y-1">
-                  <div className="flex justify-between"><span>Action 1: Refund Duplicate Debit</span> <strong className="text-emerald-400">₹4,999</strong></div>
-                  <div className="flex justify-between"><span>Action 2: SLA Breach Courtesy Voucher</span> <strong className="text-emerald-400">₹500</strong></div>
-                  <div className="flex justify-between"><span>Action 3: Carrier Priority Escalation</span> <strong className="text-slate-200">SwiftLogistics</strong></div>
-                </div>
-
                 <div className="flex items-center space-x-3 pt-1">
                   <button
                     onClick={handleApproveActions}
@@ -359,7 +384,7 @@ export default function TicketDetailView({ ticketId, onBack }) {
                     {executing ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>Executing Ledger Disbursement...</span>
+                        <span>Executing Actions...</span>
                       </>
                     ) : (
                       <>
@@ -382,7 +407,7 @@ export default function TicketDetailView({ ticketId, onBack }) {
 
             <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
               {auditLogs.map((log) => (
-                <div key={log.id} className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 text-[11px]">
+                <div key={log.id || log.timestamp} className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 text-[11px]">
                   <div className="flex items-center justify-between text-slate-400 font-mono mb-0.5">
                     <span className="font-bold text-blue-400">{log.actor}</span>
                     <span>{new Date(log.timestamp).toLocaleTimeString()}</span>

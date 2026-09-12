@@ -8,7 +8,8 @@ import {
   CheckCircle2, 
   AlertTriangle,
   Zap,
-  Users
+  Users,
+  BookOpen
 } from 'lucide-react';
 
 export default function Navbar({ activeTab, setActiveTab, pendingApprovalsCount = 1 }) {
@@ -88,6 +89,18 @@ export default function Navbar({ activeTab, setActiveTab, pendingApprovalsCount 
             >
               <Users className="w-4 h-4" />
               <span>User Profiles</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('knowledge')}
+              className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeTab === 'knowledge'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Knowledge Base</span>
             </button>
 
             <button

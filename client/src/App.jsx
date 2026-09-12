@@ -6,6 +6,7 @@ import TicketDetailView from './components/TicketDetailView';
 import ApprovalConsole from './components/ApprovalConsole';
 import AnalyticsHub from './components/AnalyticsHub';
 import UserProfileManager from './components/UserProfileManager';
+import KnowledgeBaseExplorer from './components/KnowledgeBaseExplorer';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -57,6 +58,10 @@ export default function App() {
 
         {activeTab === 'users' && (
           <UserProfileManager onSelectUserForChat={() => setActiveTab('chat')} />
+        )}
+
+        {activeTab === 'knowledge' && (
+          <KnowledgeBaseExplorer />
         )}
 
         {activeTab === 'analytics' && (

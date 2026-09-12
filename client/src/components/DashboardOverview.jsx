@@ -265,6 +265,11 @@ export default function DashboardOverview({ onSelectTicket }) {
                     </td>
 
                     <td className="px-5 py-4 max-w-xs">
+                      <div className="flex items-center space-x-1.5 mb-1">
+                        <span className="px-2 py-0.5 text-[9px] font-extrabold uppercase rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                          {t.specialist_agent || t.category || 'Specialist Agent'}
+                        </span>
+                      </div>
                       <p className="text-slate-300 font-medium truncate">{t.customer_message}</p>
                       <p className="text-[10px] text-slate-500 mt-0.5">{new Date(t.created_at).toLocaleString()}</p>
                     </td>

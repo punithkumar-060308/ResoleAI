@@ -11,6 +11,7 @@ import escalationsRouter from './routes/escalations.js';
 import policiesRouter from './routes/policies.js';
 import auditRouter from './routes/audit.js';
 import analyticsRouter from './routes/analytics.js';
+import knowledgeRouter from './routes/knowledge.js';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use('/api/escalations', escalationsRouter);
 app.use('/api/policies', policiesRouter);
 app.use('/api/audit', auditRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/knowledge', knowledgeRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({

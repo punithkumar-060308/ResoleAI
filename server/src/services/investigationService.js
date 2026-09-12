@@ -1,8 +1,12 @@
 import { db } from '../db/database.js';
+import { RoutingService } from './routingService.js';
+import { TechnicalAgent } from './technicalAgent.js';
+import { SecurityAgent } from './securityAgent.js';
+import { KnowledgeService } from './knowledgeService.js';
 
 export class InvestigationService {
   /**
-   * Conducts a deep multi-source investigation across CRM, Orders, Billing, Support Logs, and Policies.
+   * Conducts a deep multi-source investigation across CRM, Orders, Billing, Technical Logs, Security Events, and Knowledge Engine.
    * @param {string} ticketId
    */
   static async investigateTicket(ticketId) {
@@ -10,6 +14,9 @@ export class InvestigationService {
     if (!ticket) {
       throw new Error(`Ticket ${ticketId} not found`);
     }
+
+    // Step 1: Run Intelligent Ticket Router
+    const routingResult = RoutingService.analyzeAndRoute(ticket);
 
     const customerId = ticket.customer_id;
     const customer = db.findById('customers', customerId);
@@ -25,6 +32,10 @@ export class InvestigationService {
     const supportHistory = db.find('support_history', h => h.customer_id === customerId);
     const policies = db.find('policies');
 
+    // Step 2: Multi-Agent Inquiries (Technical & Security Agents)
+    const technicalReport = TechnicalAgent.inspectTechnicalIssue(ticket);
+    const securityReport = SecurityAgent.inspectAccountSecurity(ticket);
+
     // 1. Gather Evidence Package
     const evidencePackage = [];
     const contradictions = [];
@@ -32,9 +43,9 @@ export class InvestigationService {
     // Profile evidence
     if (customer) {
       evidencePackage.push({
-        source: 'CRM / Customer Intelligence',
+        source: 'CRM / Customer Intelligence Agent',
         type: 'CUSTOMER_PROFILE',
-        fact: `Customer ${customer.name} (${customer.id}) is a ${customer.tier} tier member. Lifetime Value: ₹${customer.lifetime_value.toLocaleString()}.`,
+        fact: `Customer ${customer.name} (${customer.id}) is a ${customer.tier} tier member. Lifetime Value: ₹${customer.lifetime_value.toLocaleString()}. Risk Score: ${customer.risk_score}.`,
         severity: 'INFO',
         timestamp: new Date().toISOString()
       });
@@ -43,7 +54,7 @@ export class InvestigationService {
     // Order & SLA evidence
     if (targetOrder) {
       evidencePackage.push({
-        source: 'Order Management System',
+        source: 'Order Management Agent',
         type: 'ORDER_STATUS',
         fact: `Order ${targetOrder.id} placed on ${new Date(targetOrder.order_date).toLocaleDateString()} for ₹${targetOrder.total_amount}. Items: ${targetOrder.items.map(i => i.name).join(', ')}.`,
         severity: 'INFO',
@@ -66,7 +77,7 @@ export class InvestigationService {
     if (successfulPayments.length > 1) {
       const totalCharged = successfulPayments.reduce((sum, p) => sum + p.amount, 0);
       evidencePackage.push({
-        source: 'Billing & Payment Gateway (Razorpay)',
+        source: 'Billing Agent & Payment Gateway (Razorpay)',
         type: 'DUPLICATE_CHARGE_DETECTED',
         fact: `CRITICAL BILLING DISCREPANCY: Found ${successfulPayments.length} successful charges totaling ₹${totalCharged} for single Order ${targetOrder ? targetOrder.id : ''}. Transactions: ${successfulPayments.map(p => p.transaction_ref).join(', ')}.`,
         severity: 'CRITICAL',
@@ -81,12 +92,30 @@ export class InvestigationService {
       });
     } else if (successfulPayments.length === 1) {
       evidencePackage.push({
-        source: 'Billing System',
+        source: 'Billing Agent',
         type: 'PAYMENT_VERIFIED',
         fact: `Single payment of ₹${successfulPayments[0].amount} verified. Txn Ref: ${successfulPayments[0].transaction_ref}.`,
         severity: 'INFO',
         timestamp: successfulPayments[0].timestamp
       });
+    }
+
+    // Technical Agent Evidence
+    if (technicalReport.evidence) {
+      evidencePackage.push(technicalReport.evidence);
+    }
+
+    // Security Agent Evidence & Contradiction
+    if (securityReport.evidence) {
+      evidencePackage.push(securityReport.evidence);
+      if (securityReport.security_flagged) {
+        contradictions.push({
+          system_a: 'Account Verification Engine',
+          system_b: 'InfoSec Audit Monitor',
+          conflict: `Account email modification request initiated immediately following an unrecognized foreign IP login from Moscow, Russia.`,
+          impact: 'Critical Account Takeover Threat — High Risk Fraud Alert.'
+        });
+      }
     }
 
     // Support history evidence & Bot failure contradiction
@@ -96,7 +125,7 @@ export class InvestigationService {
         evidencePackage.push({
           source: 'Support History Database',
           type: 'REPEAT_UNRESOLVED_COMPLAINT',
-          fact: `Prior support ticket ${recentUnresolved.id} on ${new Date(recentUnresolved.created_at).toLocaleDateString()} was closed automatically without resolving customer's double-charge complaint.`,
+          fact: `Prior support ticket ${recentUnresolved.id} on ${new Date(recentUnresolved.created_at).toLocaleDateString()} was closed automatically without resolving customer's complaint.`,
           severity: 'WARNING',
           timestamp: recentUnresolved.created_at
         });
@@ -110,25 +139,12 @@ export class InvestigationService {
       }
     }
 
-    // Policy Applicability Check
-    const applicablePolicies = [];
-    if (successfulPayments.length > 1) {
-      const p1 = policies.find(p => p.code === 'DUPLICATE_PAYMENT_REFUND');
-      if (p1) applicablePolicies.push(p1);
-      const p3 = policies.find(p => p.code === 'HIGH_VALUE_REFUND_APPROVAL');
-      if (p3) applicablePolicies.push(p3);
-    }
-
-    if (targetOrder && targetOrder.sla_breached) {
-      const p2 = policies.find(p => p.code === 'SLA_BREACH_COMPENSATION');
-      if (p2) applicablePolicies.push(p2);
-      const p4 = policies.find(p => p.code === 'LOGISTICS_ESCALATION_TIER');
-      if (p4) applicablePolicies.push(p4);
-    }
+    // Step 3: Knowledge Reasoning Engine Lookup
+    const matchedKnowledge = KnowledgeService.getMatchedKnowledgeForTicket(ticket, { evidencePackage });
 
     // Overall Risk Calculation
     let calculatedRisk = 'LOW';
-    if (contradictions.length > 0 || (targetOrder && targetOrder.sla_breached && successfulPayments.length > 1)) {
+    if (securityReport.security_flagged || contradictions.length > 0 || (targetOrder && targetOrder.sla_breached && successfulPayments.length > 1)) {
       calculatedRisk = 'HIGH';
     } else if (targetOrder && targetOrder.sla_breached) {
       calculatedRisk = 'MEDIUM';
@@ -142,12 +158,16 @@ export class InvestigationService {
       customer_id: customerId,
       order_id: targetOrder ? targetOrder.id : null,
       status: 'COMPLETED',
+      routing_info: routingResult,
       calculated_risk: calculatedRisk,
       evidence_count: evidencePackage.length,
       contradiction_count: contradictions.length,
       evidence_package: evidencePackage,
       contradictions: contradictions,
-      applicable_policies: applicablePolicies,
+      applicable_policies: policies,
+      matched_knowledge: matchedKnowledge,
+      technical_report: technicalReport,
+      security_report: securityReport,
       created_at: new Date().toISOString()
     };
 
@@ -168,7 +188,7 @@ export class InvestigationService {
       ticket_id: ticketId,
       actor: 'Multi-Source Investigation Engine',
       action: 'INVESTIGATION_COMPLETED',
-      details: `Gathered ${evidencePackage.length} evidence items, detected ${contradictions.length} system contradictions. Risk level evaluated as ${calculatedRisk}.`,
+      details: `Routed to ${routingResult.specialist_agent}. Gathered ${evidencePackage.length} evidence items, matched ${matchedKnowledge.length} knowledge articles, detected ${contradictions.length} contradictions. Risk evaluated as ${calculatedRisk}.`,
       timestamp: new Date().toISOString()
     });
 

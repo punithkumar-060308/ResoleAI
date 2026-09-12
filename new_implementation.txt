@@ -1,0 +1,1686 @@
+RESOLVEAI — UPDATED IMPLEMENTATION.TXT
+Build Bengaluru Hackathon — Track 2: Customer Support
+
+====================================================================
+0. IMPORTANT: WHAT THIS VERSION ADDS
+====================================================================
+
+This is the updated implementation plan for the existing ResolveAI prototype.
+
+The current prototype already contains:
+- Multi-source investigation
+- Contradiction detection
+- Qwen reasoning
+- EnterPro workflow
+- Risk-based action execution
+- Human approval console
+- Customer profiles
+- Customer chat
+- Support dashboard
+- Ticket investigation/evidence view
+- Analytics
+- Audit trail
+- Razorpay-style payment investigation
+- Logistics escalation
+
+DO NOT rebuild the application from scratch.
+
+The goal now is to close the gaps between the current implementation and the
+official Track 2 requirements.
+
+OFFICIAL TRACK 2 REQUIREMENTS TO COVER:
+
+1. Autonomous Support Agent
+2. Intelligent Ticket Router
+3. Multi-Agent Support System
+4. Knowledge Reasoning Engine
+5. AI Complaint Investigation System
+6. Context-Aware Response Generator
+7. Escalation Intelligence System
+8. Customer Experience Analytics Engine
+
+CORE CHALLENGE:
+The system must demonstrate context retention, reasoning, automation and
+human handoff — NOT just question-answering.
+
+
+====================================================================
+1. FINAL PROJECT VISION
+====================================================================
+
+PROJECT:
+ResolveAI — Autonomous Customer Support Intelligence Platform
+
+ONE-LINE PITCH:
+
+ResolveAI turns every customer complaint into an investigation. It collects
+context from multiple enterprise systems, routes the issue to the right
+specialist agents, reasons over evidence using Qwen, identifies root causes,
+takes safe actions automatically, and escalates risky/complex cases to a
+human with complete context.
+
+TRADITIONAL SUPPORT:
+
+Customer -> Ticket -> Chatbot Answer
+
+RESOLVEAI:
+
+Customer
+   ->
+Understand
+   ->
+Route
+   ->
+Investigate
+   ->
+Collect Context
+   ->
+Reason over Evidence
+   ->
+Find Root Cause
+   ->
+Assess Risk
+   ->
+Decide
+   ->
+Act OR Escalate
+   ->
+Generate Context-Aware Response
+   ->
+Audit
+   ->
+Analytics
+
+
+====================================================================
+2. OFFICIAL REQUIREMENT -> OUR IMPLEMENTATION
+====================================================================
+
+REQUIREMENT 1:
+Autonomous Support Agent
+
+IMPLEMENT:
+The Orchestrator + Resolution workflow should be able to handle a complete
+multi-step case instead of stopping after one AI answer.
+
+Example:
+Complaint
+ -> identify customer
+ -> inspect order
+ -> inspect payments
+ -> inspect previous tickets
+ -> inspect policy
+ -> determine root cause
+ -> recommend action
+ -> execute safe action
+ -> escalate if needed
+ -> generate response
+ -> log result
+
+This demonstrates autonomous multi-step support.
+
+
+--------------------------------------------------------------------
+REQUIREMENT 2:
+Intelligent Ticket Router
+--------------------------------------------------------------------
+
+ADD:
+
+A dedicated routing stage before investigation.
+
+The router determines:
+- Intent
+- Category
+- Urgency
+- Sentiment
+- Customer priority
+- Required specialist
+- SLA priority
+- Escalation probability
+
+SUPPORTED CATEGORIES:
+
+BILLING
+ORDER
+DELIVERY
+RETURNS
+REFUNDS
+TECHNICAL
+ACCOUNT
+FRAUD / SECURITY
+GENERAL
+
+ROUTING EXAMPLES:
+
+"Charged twice"
+ -> Billing Agent
+
+"Order hasn't arrived"
+ -> Order/Delivery Agent
+
+"My app crashes whenever I open checkout"
+ -> Technical Agent
+
+"I cannot log into my account"
+ -> Account Agent
+
+"Someone changed my account email"
+ -> Security / Human Escalation
+
+The router should use Qwen for understanding the request but return a
+structured result.
+
+Example:
+
+{
+  "category": "billing",
+  "intent": "duplicate_payment",
+  "urgency": "high",
+  "sentiment": "frustrated",
+  "priority": "P1",
+  "specialist": "billing",
+  "needs_investigation": true
+}
+
+
+--------------------------------------------------------------------
+REQUIREMENT 3:
+Multi-Agent Support System
+--------------------------------------------------------------------
+
+CURRENT LOGICAL AGENTS:
+
+1. Orchestrator
+2. Customer Intelligence
+3. Order Investigation
+4. Billing
+5. Knowledge / Policy
+6. Resolution
+7. Response
+
+ADD TWO SPECIALIST ROLES:
+
+8. Technical Support Agent
+9. Account & Security Agent
+
+IMPORTANT:
+These do NOT need to be nine separate AI models.
+
+They are logical specialist roles inside the EnterPro workflow.
+
+TECHNICAL AGENT:
+Checks:
+- Product/app issue
+- Error logs
+- Known incidents
+- Product version
+- Previous technical tickets
+- Known fixes
+- Troubleshooting knowledge
+
+ACCOUNT & SECURITY AGENT:
+Checks:
+- Account status
+- Login issues
+- Recent account changes
+- Security flags
+- Suspicious activity
+- Verification status
+
+This directly satisfies the official requirement that specialized agents
+handle billing, technical, order and account-related issues.
+
+
+====================================================================
+3. KNOWLEDGE REASONING ENGINE
+====================================================================
+
+ADD A REAL KNOWLEDGE LAYER.
+
+The Knowledge Reasoning Engine should combine:
+
+- Company policies
+- Product documentation
+- FAQ / help articles
+- Previous resolved tickets
+- Known issue database
+- Compensation rules
+- Refund rules
+- Escalation rules
+
+The system should retrieve relevant knowledge based on the ticket.
+
+EXAMPLE:
+
+Customer:
+"My payment failed but money was deducted."
+
+Knowledge sources:
+- Payment failure policy
+- Refund policy
+- Previous payment incidents
+- Payment gateway documentation
+
+The AI should combine:
+Customer context + enterprise records + knowledge
+
+and then make a recommendation.
+
+IMPORTANT:
+Do not simply send the entire knowledge database to Qwen.
+
+Retrieve only relevant documents/rules.
+
+
+====================================================================
+4. AI COMPLAINT INVESTIGATION SYSTEM
+====================================================================
+
+This is one of the strongest parts of ResolveAI.
+
+Every complaint should produce an investigation record.
+
+INVESTIGATION OUTPUT:
+
+CASE ID
+Customer
+Intent
+Urgency
+Sentiment
+Related records
+Evidence
+Contradictions
+Root cause
+Policy matches
+Risk
+Recommended actions
+Human approval requirement
+
+EXAMPLE:
+
+CASE #T-9281
+
+Issue:
+Duplicate payment + delayed order
+
+Evidence:
+- Two successful ₹4,999 payments
+- Same order ID
+- Shipment delayed 6 days
+- Previous unresolved complaint
+- SLA breached
+
+Contradiction:
+Order system expected 1 charge
+Payment ledger contains 2 successful charges
+
+Root Cause:
+Duplicate payment + logistics SLA breach
+
+Policy:
+Refund eligible
+Compensation eligible
+
+Risk:
+HIGH
+
+Decision:
+Human approval required for financial action.
+
+
+====================================================================
+5. CONTRADICTION DETECTION
+====================================================================
+
+KEEP THE EXISTING CONTRADICTION ENGINE AND MAKE IT VISIBLE.
+
+Examples:
+
+ORDER SYSTEM:
+Expected payment = ₹4,999
+
+PAYMENT SYSTEM:
+Actual successful payments = ₹9,998
+
+OR:
+
+SUPPORT HISTORY:
+"Refund processed"
+
+REFUND SYSTEM:
+"Refund pending"
+
+OR:
+
+ORDER SYSTEM:
+"Delivered"
+
+CUSTOMER:
+"Not received"
+
+These contradictions should:
+- be highlighted in the UI
+- increase risk
+- prevent unsafe automatic action
+- trigger human review
+- be included in the investigation evidence
+- be recorded in the audit log
+
+This is a major differentiator from a normal chatbot.
+
+
+====================================================================
+6. CONTEXT RETENTION
+====================================================================
+
+The official challenge specifically requires context retention.
+
+ResolveAI must remember context during the entire case.
+
+CONTEXT SHOULD INCLUDE:
+
+- Customer profile
+- Customer tier
+- Current ticket
+- Previous tickets
+- Previous conversations
+- Related orders
+- Payment records
+- Shipment records
+- Product information
+- Policies
+- Previous actions
+- Current investigation
+- AI recommendation
+- Approval status
+- Escalation status
+
+WHEN ESCALATED:
+
+The human agent must receive the entire relevant context.
+
+Do NOT make the human agent ask the customer to repeat everything.
+
+
+====================================================================
+7. CONTEXT-AWARE RESPONSE GENERATOR
+====================================================================
+
+The Response Agent must not generate generic responses.
+
+BAD:
+
+"Sorry for the inconvenience. Please wait 5–7 business days."
+
+GOOD:
+
+"Hi Aarav, we found two successful ₹4,999 payments against order ORD9281.
+Your shipment is also six days beyond the expected delivery SLA. We have
+flagged the duplicate payment for refund approval and escalated the shipment
+to our logistics team. You will receive an update once the approval is
+completed."
+
+Response should consider:
+- Customer name
+- Current issue
+- Customer history
+- Actions already taken
+- Company policy
+- Expected next step
+- Escalation status
+
+Never claim an action was completed if it is only recommended/pending approval.
+
+
+====================================================================
+8. ESCALATION INTELLIGENCE
+====================================================================
+
+Do not simply escalate every difficult ticket.
+
+Build an escalation decision.
+
+ESCALATION SIGNALS:
+
+- High financial value
+- Fraud/security indicators
+- Conflicting data
+- Angry/high-risk customer
+- Repeated unresolved complaints
+- SLA breach
+- VIP customer
+- Low AI confidence
+- Policy ambiguity
+- Account security issue
+- Multiple departments involved
+
+ESCALATION DESTINATION:
+
+Billing
+Logistics
+Technical
+Account/Security
+Fraud
+Supervisor
+
+EXAMPLE:
+
+Duplicate ₹4,999 payment
++
+6-day shipment delay
++
+previous unresolved complaint
+
+-> Billing + Logistics
+-> Supervisor approval for refund
+-> Complete context attached
+
+
+====================================================================
+9. RISK ENGINE
+====================================================================
+
+KEEP THE CURRENT RISK-BASED ACTION ENGINE.
+
+LOW RISK:
+- Tracking response
+- Ticket classification
+- Ticket assignment
+- Internal notes
+- Status update
+
+MEDIUM RISK:
+- Small compensation
+- Replacement
+- Standard refund
+
+HIGH RISK:
+- Large refund
+- Fraud
+- Security issue
+- Account takeover
+- Contradictory data
+- Identity uncertainty
+- Policy conflict
+
+FLOW:
+
+AI Recommendation
+   ->
+Risk Engine
+   ->
++-----------+------------+
+|           |            |
+LOW       MEDIUM        HIGH
+|           |            |
+AUTO      VALIDATE      HUMAN
+ACTION    /APPROVE      REVIEW
+
+
+IMPORTANT:
+Qwen recommends.
+Backend/business rules validate.
+EnterPro executes the approved workflow.
+Audit log records the action.
+
+
+====================================================================
+10. AUTONOMOUS SUPPORT AGENT
+====================================================================
+
+Create a single "ResolveAI Agent" experience.
+
+The customer should not need to manually choose every operation.
+
+Example:
+
+Customer:
+"I was charged twice and my order is late."
+
+ResolveAI automatically:
+1. Detects two issues
+2. Creates/updates ticket
+3. Identifies customer
+4. Routes billing + delivery
+5. Retrieves records
+6. Checks history
+7. Checks policies
+8. Detects contradiction
+9. Calls Qwen
+10. Produces root cause
+11. Creates actions
+12. Applies risk rules
+13. Sends low-risk actions automatically
+14. Sends high-risk action to approval
+15. Generates response
+16. Updates audit trail
+
+This is the main autonomous-agent demonstration.
+
+
+====================================================================
+11. WEBSITE / FRONTEND DESIGN
+====================================================================
+
+The website should look like an enterprise customer-support command center,
+NOT a simple chatbot.
+
+CURRENT SCREENS TO KEEP:
+
+1. Customer Chat
+2. Support Dashboard
+3. Ticket Detail / Evidence Inspector
+4. Human Approval Console
+5. Analytics Hub
+6. User Profile Manager
+
+IMPROVE THEM WITH THE FOLLOWING STRUCTURE.
+
+
+--------------------------------------------------------------------
+A. MAIN SUPPORT DASHBOARD
+--------------------------------------------------------------------
+
+HEADER:
+ResolveAI
+Autonomous Customer Support Intelligence
+
+TOP KPI CARDS:
+- Open Tickets
+- AI Resolved
+- Human Escalations
+- Average Resolution Time
+- High Risk Cases
+
+LEFT / MAIN:
+Priority ticket queue
+
+Each ticket card:
+- Ticket ID
+- Customer
+- Issue
+- Category
+- Priority
+- Sentiment
+- Risk
+- SLA
+- Assigned specialist
+- Status
+
+RIGHT:
+Live AI Activity
+
+Example:
+✓ Customer identified
+✓ Order retrieved
+✓ Payment checked
+⚠ Contradiction detected
+✓ Qwen analysis complete
+⏳ Waiting for approval
+
+
+--------------------------------------------------------------------
+B. CUSTOMER CHAT
+--------------------------------------------------------------------
+
+Customer-facing interface.
+
+Include:
+- Conversation
+- Customer name
+- Ticket number
+- Status
+- AI investigation indicator
+- Suggested response
+- Investigation progress
+
+ADD:
+"View Investigation" button.
+
+When clicked, show:
+- customer context
+- records used
+- evidence
+- AI finding
+- actions
+- escalation status
+
+
+--------------------------------------------------------------------
+C. TICKET DETAIL / INVESTIGATION VIEW
+--------------------------------------------------------------------
+
+This should be the strongest screen.
+
+LAYOUT:
+
+Ticket header
+    |
+Customer Context
+    |
+Issue Summary
+    |
+Investigation Timeline
+    |
+Evidence Sources
+    |
+Contradictions
+    |
+Knowledge / Policy Matches
+    |
+Root Cause
+    |
+AI Recommendation
+    |
+Risk
+    |
+Actions
+    |
+Approval / Escalation
+    |
+Audit Trail
+
+EVIDENCE SOURCES:
+
+CRM
+Orders
+Payments
+Support History
+Knowledge Base
+Policies
+Technical Logs
+Account/Security
+
+Each source should show:
+- source name
+- status
+- relevant finding
+
+
+--------------------------------------------------------------------
+D. HUMAN APPROVAL CONSOLE
+--------------------------------------------------------------------
+
+Show:
+
+HIGH-RISK ACTION
+
+Customer:
+Aarav Sharma
+
+Issue:
+Duplicate payment
+
+Amount:
+₹4,999
+
+Risk:
+HIGH
+
+Why:
+Two successful transactions detected for one order.
+
+Evidence:
+Payment records + order records + previous support history
+
+Recommendation:
+Refund duplicate payment
+
+Buttons:
+APPROVE
+REJECT
+REQUEST MORE INFORMATION
+ESCALATE
+
+Also show:
+- customer history
+- policy
+- AI reasoning summary
+- actions already performed
+
+
+--------------------------------------------------------------------
+E. ANALYTICS HUB
+--------------------------------------------------------------------
+
+Add:
+
+KPI:
+- AI resolution rate
+- Escalation rate
+- Average handling time
+- SLA breach rate
+- Repeat complaint rate
+- Customer satisfaction proxy
+
+CHARTS:
+- Tickets by category
+- Tickets by priority
+- Root cause distribution
+- Escalations by department
+- SLA breaches by carrier
+- Repeat complaints
+- Resolution outcome
+
+INSIGHTS:
+
+Example:
+"23% of delivery complaints are associated with SwiftLogistics."
+
+"Customers with unresolved tickets are 2.4x more likely to contact support again."
+
+"Duplicate payment incidents increased this week."
+
+These insights should be generated from the available demo dataset, not invented.
+
+
+--------------------------------------------------------------------
+F. CUSTOMER PROFILE
+--------------------------------------------------------------------
+
+Show:
+
+Customer:
+Aarav Sharma
+
+Tier:
+VIP Gold
+
+LTV:
+₹XX,XXX
+
+Tickets:
+XX
+
+Resolved:
+XX
+
+Escalated:
+XX
+
+Recent orders
+
+Payment history
+
+Previous support conversations
+
+Complaint history
+
+Current sentiment
+
+Open issues
+
+
+====================================================================
+12. INVESTIGATION TIMELINE UI
+====================================================================
+
+Make the investigation visually obvious.
+
+EXAMPLE:
+
+CASE #T-9281
+
+[✓] Ticket received
+[✓] Intent detected — Billing + Delivery
+[✓] Customer identified — C1024
+[✓] Customer history loaded
+[✓] Order loaded — ORD9281
+[✓] Shipment checked — 6-day SLA breach
+[✓] Payment checked — duplicate payment
+[⚠] Contradiction detected
+[✓] Policy matched
+[✓] Qwen root-cause analysis
+[✓] Resolution generated
+[!] High-risk action detected
+[!] Human approval required
+[ ] Refund execution
+[ ] Customer confirmation
+[ ] Audit completed
+
+This gives judges a clear view of what the autonomous system is doing.
+
+
+====================================================================
+13. KNOWLEDGE BASE UI
+====================================================================
+
+ADD A KNOWLEDGE BASE SECTION.
+
+Categories:
+- Refund Policy
+- Payment Policy
+- Delivery Policy
+- Compensation Policy
+- Account Policy
+- Security Policy
+- Technical Troubleshooting
+- Product Information
+
+Each article should have:
+- title
+- category
+- version
+- source
+- content
+- last updated
+
+During investigation, show:
+"Relevant knowledge found"
+
+Then list the exact policy/article used.
+
+This makes the reasoning explainable.
+
+
+====================================================================
+14. TICKET ROUTING UI
+====================================================================
+
+When a new ticket arrives, show:
+
+AI ROUTING
+
+Category:
+Billing
+
+Intent:
+Duplicate Payment
+
+Urgency:
+High
+
+Sentiment:
+Frustrated
+
+Customer:
+VIP Gold
+
+Assigned:
+Billing Agent
+
+Secondary:
+Order/Delivery Agent
+
+SLA:
+2 hours
+
+Escalation probability:
+High
+
+This directly demonstrates the Intelligent Ticket Router requirement.
+
+
+====================================================================
+15. MULTI-CHANNEL INPUT
+====================================================================
+
+The system can simulate multiple support channels.
+
+Supported UI options:
+
+- Chat
+- Email
+- Ticket
+- Phone transcript
+
+For the hackathon, actual phone integration is NOT required.
+
+Use a sample phone transcript as text if needed.
+
+All channels should enter the same ResolveAI pipeline.
+
+CHANNEL
+   ->
+NORMALIZE
+   ->
+TICKET
+   ->
+ROUTER
+   ->
+INVESTIGATION
+
+
+====================================================================
+16. DATABASE
+====================================================================
+
+CURRENT IMPLEMENTATION USES:
+MongoDB Atlas with local db_store.json fallback.
+
+KEEP THIS IF IT IS WORKING.
+
+The hackathon requirement does NOT force PostgreSQL.
+
+IMPORTANT:
+Update documentation/architecture diagrams so they consistently say MongoDB,
+not PostgreSQL.
+
+COLLECTIONS / DATA:
+
+Customers
+Tickets
+Orders
+Payments
+SupportHistory
+Policies
+KnowledgeArticles
+Investigations
+AIRecommendations
+Escalations
+AuditLogs
+TechnicalIssues
+AccountSecurityEvents
+
+Use realistic seeded data.
+
+
+====================================================================
+17. BACKEND SERVICES
+====================================================================
+
+Suggested services:
+
+ticketService.js
+customerService.js
+orderService.js
+paymentService.js
+knowledgeService.js
+investigationService.js
+routingService.js
+qwenService.js
+workflowService.js
+riskService.js
+escalationService.js
+responseService.js
+analyticsService.js
+auditService.js
+
+Do not duplicate business logic between routes and services.
+
+
+====================================================================
+18. API PLAN
+====================================================================
+
+TICKETS:
+POST /api/tickets
+GET /api/tickets
+GET /api/tickets/:id
+
+CUSTOMERS:
+GET /api/customers/:id
+
+ORDERS:
+GET /api/customers/:id/orders
+
+PAYMENTS:
+GET /api/customers/:id/payments
+
+SUPPORT HISTORY:
+GET /api/customers/:id/tickets
+
+ROUTING:
+POST /api/routing/analyze
+
+KNOWLEDGE:
+GET /api/knowledge
+GET /api/knowledge/search
+
+INVESTIGATION:
+POST /api/investigations
+GET /api/investigations/:ticketId
+
+QWEN:
+POST /api/ai/analyze
+
+ACTIONS:
+POST /api/actions/validate
+POST /api/actions/execute
+
+ESCALATION:
+POST /api/escalations
+GET /api/escalations
+
+APPROVAL:
+POST /api/approvals/:id/approve
+POST /api/approvals/:id/reject
+
+AUDIT:
+GET /api/audit/:ticketId
+
+ANALYTICS:
+GET /api/analytics
+
+
+====================================================================
+19. ENTERPRO WORKFLOW
+====================================================================
+
+TARGET WORKFLOW:
+
+INPUT
+ |
+ v
+Ticket Intake
+ |
+ v
+Intent + Sentiment
+ |
+ v
+Intelligent Router
+ |
+ +-------------------------------+
+ |               |               |
+ v               v               v
+Customer       Order           Billing
+Agent          Agent           Agent
+ |               |               |
+ +---------------+---------------+
+                 |
+        +--------+---------+
+        |                  |
+        v                  v
+ Technical            Account/Security
+ Agent                   Agent
+        |                  |
+        +--------+---------+
+                 |
+                 v
+       Knowledge / Policy
+                 |
+                 v
+        Evidence Builder
+                 |
+                 v
+       Contradiction Check
+                 |
+                 v
+              QWEN
+                 |
+                 v
+         Root Cause Analysis
+                 |
+                 v
+        Resolution Decision
+                 |
+                 v
+            Risk Engine
+            /          \
+           /            \
+          v              v
+     Low Risk         High Risk
+        |                 |
+        v                 v
+   Auto Action       Human Approval
+        |                 |
+        +--------+--------+
+                 |
+                 v
+        Context-Aware Response
+                 |
+                 v
+             Audit Log
+                 |
+                 v
+             Analytics
+
+
+====================================================================
+20. QWEN IMPLEMENTATION
+====================================================================
+
+Qwen should receive structured information.
+
+INPUT:
+
+Customer complaint
++
+Customer context
++
+Routing result
++
+Investigation evidence
++
+Knowledge/policy matches
++
+Previous support history
+
+OUTPUT:
+
+{
+  "intent": "...",
+  "category": "...",
+  "urgency": "...",
+  "sentiment": "...",
+  "issues": [],
+  "root_causes": [],
+  "evidence": [],
+  "policy_matches": [],
+  "recommended_actions": [],
+  "risk_level": "...",
+  "needs_human": true,
+  "escalation_department": "...",
+  "customer_response": "..."
+}
+
+Use deterministic validation after Qwen.
+
+If Qwen returns invalid JSON:
+- retry/repair safely
+- validate
+- fallback to human review
+
+
+====================================================================
+21. ACTION ENGINE
+====================================================================
+
+CURRENT ACTION ENGINE SHOULD BE RETAINED.
+
+EXAMPLE ACTIONS:
+
+Refund
+Replacement
+Compensation
+Ticket assignment
+Ticket priority update
+Logistics escalation
+Billing escalation
+Technical escalation
+Account security escalation
+Customer response
+
+ACTION STATES:
+
+PROPOSED
+APPROVED
+REJECTED
+EXECUTING
+COMPLETED
+FAILED
+
+Never show "COMPLETED" unless the action actually succeeded.
+
+
+====================================================================
+22. AUDIT TRAIL
+====================================================================
+
+Every important event should be recorded.
+
+Example:
+
+10:31 Ticket created
+10:31 Intent classified
+10:31 Customer identified
+10:32 Payment records retrieved
+10:32 Duplicate payment detected
+10:32 Policy retrieved
+10:33 Qwen recommendation generated
+10:33 Risk = HIGH
+10:33 Refund sent for approval
+10:34 Supervisor approved
+10:34 Refund executed
+10:34 Customer response generated
+
+Audit records:
+- timestamp
+- ticket
+- actor/system
+- action
+- result
+- reason
+
+
+====================================================================
+23. CUSTOMER EXPERIENCE ANALYTICS
+====================================================================
+
+The official requirement includes recurring issues and emerging complaints.
+
+Add these metrics:
+
+1. Repeat Contact Rate
+How often customers contact support repeatedly for the same issue.
+
+2. First Contact Resolution
+Cases resolved without another support interaction.
+
+3. Escalation Rate
+
+4. Average Resolution Time
+
+5. SLA Breach Rate
+
+6. Complaint Categories
+
+7. Root Causes
+
+8. Customer Sentiment Trend
+
+9. Churn-Risk Signal
+
+10. Department Bottlenecks
+
+CHURN SIGNAL EXAMPLE:
+
+High complaint frequency
++
+unresolved ticket
++
+negative sentiment
++
+recent failed experience
+
+= HIGH CUSTOMER EXPERIENCE RISK
+
+Do NOT claim actual churn prediction unless a real model/dataset is used.
+Call it a "churn-risk signal" or "retention risk indicator."
+
+
+====================================================================
+24. DEMO DATASET
+====================================================================
+
+Create at least 8–12 customers and 15–25 tickets so analytics look real.
+
+CUSTOMER TYPES:
+- VIP
+- Regular
+- New
+- At-risk
+
+TICKET TYPES:
+- Duplicate payment
+- Failed payment
+- Late delivery
+- Missing order
+- Refund pending
+- Damaged product
+- Login problem
+- Account security
+- Technical issue
+- Cancellation
+
+This allows the dashboard to demonstrate multiple routing paths.
+
+
+====================================================================
+25. THREE DEMO CASES
+====================================================================
+
+DEMO 1 — KILLER CASE
+Duplicate payment + delayed order
+
+Expected:
+Multi-source investigation
+Contradiction
+Qwen root cause
+Refund recommendation
+Logistics escalation
+Human approval
+Context-aware response
+
+DEMO 2 — TECHNICAL
+"My checkout page keeps crashing."
+
+Expected:
+Technical routing
+Technical knowledge retrieval
+Previous technical ticket check
+Known issue match
+Troubleshooting response
+No unnecessary human escalation
+
+DEMO 3 — SECURITY
+"I think someone changed my account email."
+
+Expected:
+Account/Security routing
+Security event lookup
+HIGH risk
+Immediate human escalation
+Complete context handoff
+No automatic sensitive action
+
+
+====================================================================
+26. WHAT THE JUDGES SHOULD SEE
+====================================================================
+
+The demo should visibly prove:
+
+CONTEXT:
+Customer history + orders + payments + previous tickets
+
+REASONING:
+Qwen identifies root cause using evidence
+
+AUTOMATION:
+Low-risk cases proceed automatically
+
+MULTI-AGENT:
+Different issues route to different specialist roles
+
+KNOWLEDGE:
+Company policies/documentation influence decisions
+
+ESCALATION:
+High-risk cases reach humans with full context
+
+ANALYTICS:
+Resolved cases produce business insights
+
+
+====================================================================
+27. PRESENTATION STORY
+====================================================================
+
+OPEN:
+
+"Most customer-support systems answer tickets.
+ResolveAI investigates them."
+
+Then show the customer complaint:
+
+"My order hasn't arrived and I was charged twice.
+I already contacted support yesterday."
+
+Do NOT immediately show the final answer.
+
+Show the system investigating:
+
+Customer -> Orders -> Payments -> History -> Policy
+
+Then reveal:
+
+CONTRADICTION DETECTED
+
+Then:
+
+QWEN ROOT CAUSE
+
+Then:
+
+RECOMMENDED ACTIONS
+
+Then:
+
+HIGH RISK -> HUMAN APPROVAL
+
+Then:
+
+APPROVE
+
+Then:
+
+CUSTOMER RESPONSE
+
+Then:
+
+AUDIT TRAIL
+
+Finally:
+
+ANALYTICS INSIGHT
+
+
+====================================================================
+28. FINAL PITCH
+====================================================================
+
+"ResolveAI is an autonomous customer-support intelligence platform that
+treats every ticket as an investigation rather than an isolated conversation.
+It understands intent and sentiment, routes issues to specialist agents,
+retrieves context from customer, order, billing, support and knowledge
+systems, detects contradictions, uses Qwen for root-cause reasoning,
+automates safe actions, and escalates risky cases to humans with complete
+context. The result is faster resolution, more consistent decisions and a
+support system that can learn from recurring customer issues."
+
+
+====================================================================
+29. VIBE-CODING IMPLEMENTATION ORDER
+====================================================================
+
+DO NOT ASK A VIBE-CODING TOOL TO REWRITE THE WHOLE PROJECT.
+
+WORK IN SMALL STEPS.
+
+STEP 1:
+Audit current code.
+
+Prompt:
+"Review the existing ResolveAI codebase against the official Build Bengaluru
+Track 2 Customer Support requirements. Do not rewrite anything. Produce a
+gap report showing DONE, PARTIAL and MISSING."
+
+STEP 2:
+Add intelligent ticket routing.
+
+STEP 3:
+Add Technical Support logical agent.
+
+STEP 4:
+Add Account/Security logical agent.
+
+STEP 5:
+Add knowledge base retrieval.
+
+STEP 6:
+Improve investigation evidence UI.
+
+STEP 7:
+Add contradiction visibility.
+
+STEP 8:
+Improve escalation intelligence.
+
+STEP 9:
+Improve context-aware response generation.
+
+STEP 10:
+Add analytics for recurring issues and retention risk.
+
+STEP 11:
+Run end-to-end demo testing.
+
+STEP 12:
+Fix bugs and polish UI.
+
+STEP 13:
+Prepare presentation and demo.
+
+
+====================================================================
+30. MASTER VIBE-CODING PROMPTS
+====================================================================
+
+PROMPT A — GAP AUDIT
+
+"Review this existing ResolveAI customer support application against the
+Build Bengaluru Track 2 requirements: Autonomous Support Agent, Intelligent
+Ticket Router, Multi-Agent Support System, Knowledge Reasoning Engine, AI
+Complaint Investigation System, Context-Aware Response Generator,
+Escalation Intelligence System and Customer Experience Analytics Engine.
+Do not rewrite code. Inspect the current architecture and give me a precise
+DONE/PARTIAL/MISSING report with the exact files that need changes."
+
+
+PROMPT B — TICKET ROUTER
+
+"Add an Intelligent Ticket Router to the existing ResolveAI application.
+Use Qwen to classify incoming support requests into billing, order,
+delivery, refund, technical, account/security, fraud/security or general.
+Return structured category, intent, urgency, sentiment, customer priority,
+specialist agent, SLA priority and escalation probability. Integrate it into
+the existing EnterPro workflow without breaking current functionality."
+
+
+PROMPT C — TECHNICAL AGENT
+
+"Add a logical Technical Support Agent to the existing ResolveAI workflow.
+It should retrieve technical issue records, product information, known
+incidents, previous technical tickets and troubleshooting knowledge. It
+should return structured evidence to the Qwen reasoning stage. Do not create
+a separate AI model."
+
+
+PROMPT D — ACCOUNT SECURITY AGENT
+
+"Add a logical Account and Security Agent to ResolveAI. It should inspect
+account status, recent account changes, security events, verification
+status and suspicious activity. High-risk account/security issues must
+automatically require human review. Integrate with the existing EnterPro
+workflow."
+
+
+PROMPT E — KNOWLEDGE ENGINE
+
+"Add a Knowledge Reasoning Engine to ResolveAI. Create a searchable
+knowledge layer containing refund, payment, delivery, compensation,
+technical, account and security policies plus product documentation and
+previous resolved cases. Retrieve only relevant knowledge for a ticket and
+pass the relevant evidence to Qwen. Display which knowledge sources were
+used."
+
+
+PROMPT F — CONTEXT RESPONSE
+
+"Improve the ResolveAI response generator so it uses customer name,
+customer history, current issue, evidence, policy, actions already taken,
+approval status and escalation status. Never claim an action is completed
+unless the backend confirms completion. Generate concise personalized
+responses."
+
+
+PROMPT G — ESCALATION
+
+"Improve ResolveAI escalation intelligence. Calculate escalation based on
+financial risk, security risk, contradictory data, repeated complaints,
+SLA breach, customer priority, policy ambiguity and multiple departments.
+Return escalation department, priority, reason and required human context.
+Integrate with the existing human approval console."
+
+
+PROMPT H — ANALYTICS
+
+"Improve the existing ResolveAI analytics dashboard. Add repeat contact
+rate, first-contact resolution, escalation rate, SLA breach rate, root cause
+distribution, sentiment trend, department bottlenecks and retention-risk
+signals. Calculate all metrics from actual seeded application data. Do not
+invent values."
+
+
+PROMPT I — FINAL INTEGRATION
+
+"Integrate the new ticket router, technical agent, account/security agent,
+knowledge engine, investigation engine, Qwen reasoning, risk engine,
+EnterPro workflow, human approval, response generation, audit log and
+analytics into the existing ResolveAI application. Preserve all working
+features. Test the three demo cases end-to-end."
+
+
+====================================================================
+31. FINAL CHECKLIST
+====================================================================
+
+TRACK 2 REQUIREMENT:
+
+[ ] Autonomous Support Agent
+[ ] Intelligent Ticket Router
+[ ] Multi-Agent Support System
+[ ] Billing Agent
+[ ] Technical Agent
+[ ] Order/Delivery Agent
+[ ] Account/Security Agent
+[ ] Knowledge Reasoning Engine
+[ ] Previous ticket context
+[ ] Product information
+[ ] AI Complaint Investigation
+[ ] Root-cause analysis
+[ ] Contradiction detection
+[ ] Context-aware response
+[ ] Escalation intelligence
+[ ] Human handoff
+[ ] Human approval
+[ ] Customer experience analytics
+[ ] Recurring issue detection
+[ ] Retention/churn-risk signal
+[ ] Audit trail
+[ ] Qwen
+[ ] EnterPro
+[ ] Frontend
+[ ] Backend
+[ ] Database
+[ ] End-to-end demo
+
+
+====================================================================
+32. FINAL ARCHITECTURE PRINCIPLE
+====================================================================
+
+ResolveAI should NOT be:
+
+LLM + Chat UI
+
+ResolveAI SHOULD be:
+
+CUSTOMER DATA
+     +
+MULTIPLE ENTERPRISE SOURCES
+     +
+SPECIALIST AGENTS
+     +
+KNOWLEDGE
+     +
+QWEN REASONING
+     +
+CONTRADICTION DETECTION
+     +
+RISK ENGINE
+     +
+ENTERPRO ORCHESTRATION
+     +
+CONTROLLED AUTOMATION
+     +
+HUMAN OVERSIGHT
+     +
+AUDIT
+     +
+ANALYTICS
+
+FINAL LOOP:
+
+UNDERSTAND
+    ->
+ROUTE
+    ->
+INVESTIGATE
+    ->
+COLLECT CONTEXT
+    ->
+RETRIEVE KNOWLEDGE
+    ->
+DETECT CONTRADICTIONS
+    ->
+REASON
+    ->
+FIND ROOT CAUSE
+    ->
+ASSESS RISK
+    ->
+ACT OR ESCALATE
+    ->
+GENERATE CONTEXT-AWARE RESPONSE
+    ->
+AUDIT
+    ->
+LEARN FROM OUTCOMES
+
+
+====================================================================
+END OF UPDATED IMPLEMENTATION.TXT
+====================================================================

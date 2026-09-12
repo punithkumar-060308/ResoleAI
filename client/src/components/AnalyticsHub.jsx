@@ -7,13 +7,10 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer, 
-  PieChart, 
-  Pie, 
-  Cell, 
   AreaChart, 
   Area 
 } from 'recharts';
-import { BarChart3, TrendingUp, AlertTriangle, ShieldCheck, Truck, Zap, Lightbulb } from 'lucide-react';
+import { BarChart3, TrendingUp, AlertTriangle, ShieldCheck, Truck, Zap, Lightbulb, ShieldAlert, CheckCircle, RefreshCw } from 'lucide-react';
 
 export default function AnalyticsHub() {
   const [data, setData] = useState(null);
@@ -28,8 +25,6 @@ export default function AnalyticsHub() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
-
-  const COLORS = ['#3b82f6', '#f59e0b', '#ef4444', '#10b981'];
 
   const volumeTrendData = [
     { day: 'Mon', total: 42, ai_resolved: 33, escalated: 9 },
@@ -51,10 +46,37 @@ export default function AnalyticsHub() {
             <BarChart3 className="w-4 h-4" />
             <span>Support Intelligence Platform Analytics</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-100">Enterprise Root Cause & Operational Insights</h1>
+          <h1 className="text-2xl font-extrabold text-slate-100">Customer Experience & Operational Intelligence</h1>
           <p className="text-xs text-slate-400 mt-1">
-            Analyze recurring support friction points, logistics bottlenecks, and automated cost savings.
+            Analyze first-contact resolution rates, retention risk signals, logistics bottlenecks, and root cause distributions.
           </p>
+        </div>
+      </div>
+
+      {/* Customer Experience KPI Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="glass-panel p-5 rounded-2xl border border-slate-800">
+          <p className="text-xs text-slate-400 font-medium">First Contact Resolution (FCR)</p>
+          <h3 className="text-2xl font-bold text-emerald-400 mt-1">{data?.kpis?.first_contact_resolution_rate || '76%'}</h3>
+          <p className="text-[11px] text-slate-400 mt-2">Cases resolved without follow-up ticket</p>
+        </div>
+
+        <div className="glass-panel p-5 rounded-2xl border border-slate-800">
+          <p className="text-xs text-slate-400 font-medium">Repeat Contact Rate</p>
+          <h3 className="text-2xl font-bold text-amber-400 mt-1">{data?.kpis?.repeat_contact_rate || '14%'}</h3>
+          <p className="text-[11px] text-slate-400 mt-2">Driven by legacy bot auto-closures</p>
+        </div>
+
+        <div className="glass-panel p-5 rounded-2xl border border-slate-800">
+          <p className="text-xs text-slate-400 font-medium">AI Auto-Resolution Rate</p>
+          <h3 className="text-2xl font-bold text-blue-400 mt-1">{data?.kpis?.ai_resolution_rate || '78%'}</h3>
+          <p className="text-[11px] text-slate-400 mt-2">Zero human intervention on low risk</p>
+        </div>
+
+        <div className="glass-panel p-5 rounded-2xl border border-slate-800">
+          <p className="text-xs text-slate-400 font-medium">Logistics SLA Breaches</p>
+          <h3 className="text-2xl font-bold text-rose-400 mt-1">{data?.kpis?.sla_breaches_detected || 19}</h3>
+          <p className="text-[11px] text-slate-400 mt-2">67% originating from SwiftLogistics</p>
         </div>
       </div>
 
@@ -69,8 +91,30 @@ export default function AnalyticsHub() {
             "{data?.insight_spotlight || '23% of delivery SLA complaints came from the same logistics partner.'}"
           </h3>
           <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-            ResolveAI cross-referenced 45 delivery complaints against carrier logs: SwiftLogistics Express sorting hub in Bengaluru has a 6-day backlog, accounting for 67% of total SLA breaches.
+            ResolveAI cross-referenced delivery complaints against carrier logs: SwiftLogistics Express sorting hub in Bengaluru has a 6-day backlog, accounting for 67% of total SLA breaches.
           </p>
+        </div>
+      </div>
+
+      {/* Retention Risk Signals Section */}
+      <div className="glass-panel p-6 rounded-2xl border border-amber-500/30 space-y-4">
+        <h3 className="font-extrabold text-sm text-slate-100 border-b border-slate-800 pb-3 flex items-center gap-2">
+          <ShieldAlert className="w-4 h-4 text-amber-400" />
+          <span>Customer Retention Risk Signals</span>
+        </h3>
+
+        <div className="space-y-3">
+          {data?.retention_risk_signals?.map((sig, idx) => (
+            <div key={idx} className="p-4 rounded-xl bg-amber-950/20 border border-amber-500/30 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <span className="font-extrabold text-slate-100">{sig.customer}</span>
+                <p className="text-slate-300 mt-0.5">{sig.reason}</p>
+              </div>
+              <span className="px-2.5 py-1 rounded text-[10px] font-extrabold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+                {sig.risk_level}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
