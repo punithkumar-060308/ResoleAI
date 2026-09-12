@@ -1,0 +1,399 @@
+RESOLVEAI — IMPLEMENTATION MASTER PLAN
+Build Bengaluru Hackathon — Customer Support Track
+
+1. PROJECT GOAL
+ResolveAI is an autonomous customer-support intelligence platform. It does not simply answer questions. It investigates a customer's complete situation across enterprise data, identifies root cause, determines the best resolution, safely executes low-risk actions, and escalates complex/risky cases with full context.
+
+CORE FLOW:
+Customer -> Understand -> Investigate -> Gather Evidence -> Qwen Reasoning -> Root Cause -> Risk Check -> Decide -> Act/Escalate -> Respond -> Audit
+
+2. PROBLEM
+Large companies receive thousands of support requests across chat, email, tickets and other channels. Existing systems often treat tickets independently, forcing agents to manually search CRM, orders, billing, shipment, previous conversations and policies. This creates slow responses, repetitive questions, inconsistent resolutions, unnecessary escalation and higher support costs.
+
+KEY GAP:
+A chatbot answers an FAQ. ResolveAI investigates the customer's actual situation using multiple data sources before deciding what should happen.
+
+3. PROPOSED SOLUTION
+When a customer submits a complaint, ResolveAI:
+1) understands intent, urgency and sentiment
+2) identifies the customer and ticket
+3) retrieves customer history
+4) checks orders and shipment
+5) checks payments/refunds
+6) checks previous support interactions
+7) retrieves relevant policies
+8) builds a structured evidence package
+9) uses Qwen for reasoning/root-cause analysis
+10) determines resolution
+11) performs safe low-risk actions
+12) requests human approval for high-impact cases
+13) escalates complex cases with complete context
+14) generates a personalized response
+15) records an audit trail
+16) updates analytics
+
+4. KILLER DEMO
+Customer: "My order hasn't arrived and I was charged twice. I already contacted support yesterday."
+
+System finds:
+Customer C1024
+Order ORD9281: delayed 6 days, SLA breached
+Payment 1: ₹4,999 successful
+Payment 2: ₹4,999 successful
+Previous complaint: unresolved
+Policy: duplicate payment refund eligible; SLA breach compensation eligible
+
+Result:
+- Root cause: duplicate payment + shipment SLA breach
+- Action: initiate refund investigation
+- Action: escalate shipment to logistics
+- Action: offer eligible compensation
+- Generate response
+- Human approval where required
+
+5. ARCHITECTURE
+Customer
+ -> React/Vite
+ -> Node.js/Express
+ -> EnterPro Workflow
+ -> Orchestrator
+ -> Customer Intelligence / Order / Billing / Policy logical agents
+ -> Context & Evidence Builder
+ -> Qwen
+ -> Root Cause Analysis
+ -> Resolution Agent
+ -> Risk Check
+ -> Auto Action OR Human Approval
+ -> Response Agent
+ -> Customer
+ -> Audit Log / Analytics
+
+IMPORTANT: The agents are logical roles, not necessarily seven separate AI models. Use Qwen where reasoning is needed; ordinary API/database tools can handle retrieval.
+
+6. AGENTS
+1. Orchestrator: decides what needs investigation and coordinates workflow.
+2. Customer Intelligence: profile, tier, previous tickets, complaints, history, sentiment/context.
+3. Order Investigation: order, shipment, delivery, delay, cancellation, return, SLA.
+4. Billing: payments, duplicate charges, failed payments, refunds.
+5. Knowledge/Policy: refund, compensation, escalation and eligibility rules.
+6. Resolution: combines evidence and recommends resolve/refund/replace/compensate/escalate/human review.
+7. Response: generates personalized customer response.
+
+7. QWEN
+Use Qwen for:
+- intent classification
+- urgency
+- sentiment
+- issue identification
+- evidence interpretation
+- root-cause analysis
+- resolution recommendation
+- escalation decision
+- structured output
+- response generation
+- tool/function calling if available
+
+Preferred JSON:
+{
+  "intent": "...",
+  "urgency": "...",
+  "sentiment": "...",
+  "issues": [],
+  "root_causes": [],
+  "evidence": [],
+  "recommended_actions": [],
+  "risk_level": "...",
+  "needs_human": true,
+  "reason": "..."
+}
+
+Do not expose hidden chain-of-thought. Display concise evidence and conclusions.
+
+8. MULTI-SOURCE INVESTIGATION ENGINE
+Input: ticket_id
+
+Retrieve:
+- customer profile
+- relevant orders
+- shipment
+- payment history
+- refunds
+- previous support tickets
+- relevant policies
+
+Then:
+data -> evidence package -> Qwen -> investigation result
+
+Add contradiction detection. Example: previous support says refund processed, refund system says pending. Flag the conflict, increase risk and require human review.
+
+9. RISK-BASED AUTOMATION
+LOW RISK:
+ticket updates, tracking/status messages, internal notes -> can be automated.
+
+MEDIUM RISK:
+small compensation, replacement, refund -> validate against policy and/or require approval.
+
+HIGH RISK:
+fraud, large refund, account takeover, identity uncertainty, conflicting data -> human approval.
+
+SAFE PATTERN:
+Qwen recommends -> backend validates -> policy/risk check -> EnterPro executes -> action logged.
+
+10. HUMAN-IN-THE-LOOP
+Approval screen must show:
+customer, complaint, history, order, payment, previous tickets, policies, evidence, root cause, AI recommendation, risk, actions already taken, Approve/Reject/Escalate.
+
+Goal: AI investigates; humans make informed decisions when required.
+
+11. FRONTEND
+Tech: React + Vite + Tailwind CSS
+
+Screens:
+- Customer chat
+- Support dashboard
+- Ticket details
+- Customer profile
+- Investigation timeline
+- Evidence panel
+- AI recommendation panel
+- Human approval screen
+- Analytics
+
+Make it look like an enterprise support dashboard, not a generic chatbot.
+
+12. BACKEND
+Tech: Node.js + Express
+
+Responsibilities:
+REST APIs, ticket management, customer/order/payment data, support history, policy retrieval, investigation endpoints, Qwen integration, action validation, escalations and audit logs.
+
+Suggested endpoints:
+POST /api/tickets
+GET /api/tickets
+GET /api/tickets/:id
+GET /api/customers/:id
+GET /api/customers/:id/orders
+GET /api/customers/:id/payments
+GET /api/customers/:id/tickets
+GET /api/policies
+POST /api/investigations
+GET /api/investigations/:ticketId
+POST /api/actions/validate
+POST /api/actions/execute
+POST /api/escalations
+GET /api/audit/:ticketId
+GET /api/analytics
+
+13. DATABASE
+PostgreSQL tables:
+Customers
+Tickets
+Orders
+Payments
+SupportHistory
+Policies
+Investigations
+AIRecommendations
+Escalations
+AuditLogs
+
+Use realistic seeded/simulated enterprise data for the prototype.
+
+14. ENTERPRO
+Use EnterPro for:
+- workflow orchestration
+- agent coordination
+- action routing
+- human escalation
+- enterprise workflow
+- deployment where applicable
+
+Workflow:
+request -> ticket -> orchestrator -> investigations -> context -> Qwen -> resolution -> risk validation -> action/human approval -> response -> audit
+
+15. ACTIONS
+Possible:
+- refund request
+- ticket priority update
+- ticket assignment
+- logistics escalation
+- billing escalation
+- replacement request
+- compensation
+- customer response
+
+Every action must be logged with type, reason, status, actor, timestamp and ticket ID.
+
+16. ANALYTICS
+Show:
+- ticket volume
+- AI resolution rate
+- human escalation rate
+- average resolution time
+- common issues
+- duplicate-payment incidents
+- delivery SLA breaches
+- repeated complaints
+- department escalation patterns
+
+Strong insight example:
+"23% of delivery complaints came from the same logistics partner."
+
+This makes ResolveAI a support intelligence platform, not just a chatbot.
+
+17. TECH STACK
+Frontend: React + Vite
+UI: Tailwind CSS
+Backend: Node.js + Express
+Database: PostgreSQL
+AI: Qwen
+Orchestration: EnterPro
+APIs: REST
+Analytics: React chart library
+Python: optional only if genuinely needed. Avoid unnecessary complexity in a 3-day build.
+
+18. SIX TEAM PARTS
+PART 1 — FRONTEND
+React UI, customer chat, dashboard, ticket page, profile, timeline, approval and analytics.
+
+PART 2 — BACKEND + DATABASE
+Express, PostgreSQL, schema, seed data, REST APIs and validation.
+
+PART 3 — QWEN / AI
+Qwen integration, prompts, intent, structured output, root-cause analysis, recommendation, response and error handling.
+
+PART 4 — MULTI-SOURCE INVESTIGATION
+Customer Intelligence, Order Investigation, Billing Investigation, Policy retrieval, evidence builder and contradiction detection.
+
+PART 5 — ENTERPRO / ORCHESTRATION
+Workflow, orchestrator, agent coordination, risk routing, human escalation and action execution.
+
+PART 6 — INTEGRATION / ANALYTICS / DEPLOYMENT
+Connect modules, end-to-end testing, audit logs, analytics, deployment, README and demo.
+
+For an ML student, the strongest choices are Part 4 or Part 3.
+
+19. VIBE-CODING STRATEGY
+Use AI coding tools heavily, but build incrementally.
+
+DO NOT ask AI to build the entire application in one prompt.
+
+Build:
+1. frontend
+2. backend
+3. database + seed data
+4. investigation service
+5. Qwen
+6. EnterPro
+7. integration
+8. testing
+9. polish
+
+AI can generate boilerplate, CRUD APIs, UI components, tests and refactors. Team members must understand and review the architecture and generated code.
+
+20. COPY-PASTE VIBE-CODING PROMPTS
+
+PROMPT 1 — FRONTEND
+"Build a production-quality React + Vite + Tailwind CSS frontend for ResolveAI, an autonomous customer support intelligence platform. Create customer chat, support dashboard, ticket details, customer profile, investigation timeline, evidence panel, AI recommendation panel, human approval screen and analytics dashboard. Start with realistic mock data. Use reusable responsive components and enterprise UI. Do not implement backend yet."
+
+PROMPT 2 — BACKEND
+"Build a modular Node.js + Express backend for ResolveAI using PostgreSQL. Create schema/models, seed data and REST APIs for customers, tickets, orders, payments, support history, policies, investigations, recommendations, escalations and audit logs. Add validation, error handling and clear service/repository separation."
+
+PROMPT 3 — QWEN
+"Integrate Qwen into ResolveAI as the AI reasoning engine. Given a customer support request and structured evidence, return validated JSON containing intent, urgency, sentiment, issues, evidence findings, root causes, recommended actions, risk level and human-escalation requirement. Add robust parsing, validation, timeout/error handling and fallback behavior. Do not expose hidden chain-of-thought."
+
+PROMPT 4 — INVESTIGATION
+"Build a multi-source investigation service for ResolveAI. Given a ticket ID, retrieve the customer profile, relevant orders, payment history, previous support tickets, shipment information and relevant company policies. Combine them into a structured evidence package. Detect contradictions and flag high-risk cases. Return concise evidence and findings for the Qwen reasoning layer."
+
+PROMPT 5 — ENTERPRO
+"Implement the ResolveAI enterprise workflow using EnterPro. Orchestrate ticket intake, intent analysis, customer investigation, order investigation, billing investigation, policy retrieval, Qwen reasoning, risk validation, action execution, human escalation, response generation and audit logging. Preserve complete context during human handoff."
+
+PROMPT 6 — INTEGRATION
+"Connect the ResolveAI React frontend, Express backend, PostgreSQL database, Qwen service and EnterPro workflow into one end-to-end application. Implement loading states, errors, approval flow, escalation flow, audit logging and analytics. Create a reliable demo flow using realistic seeded enterprise data."
+
+21. 3-DAY MVP
+MUST HAVE:
+- React frontend
+- support dashboard
+- ticket creation
+- PostgreSQL
+- customers/orders/payments/tickets/policies
+- Qwen integration
+- multi-source investigation
+- EnterPro workflow
+- recommendation
+- human approval
+- escalation
+- audit log
+- one strong end-to-end demo
+
+STRETCH:
+- advanced analytics
+- contradiction detection
+- multiple escalation departments
+- advanced risk scoring
+- learning from resolution outcomes
+- external integrations
+- voice support
+- predictive issue detection
+
+22. DEMO FLOW
+Use:
+"My order hasn't arrived and I was charged twice. I already contacted support yesterday."
+
+Show:
+1. ticket creation
+2. customer identification
+3. intent detection
+4. customer history
+5. order investigation
+6. shipment check
+7. payment investigation
+8. duplicate payment detection
+9. previous ticket
+10. policy check
+11. evidence timeline
+12. Qwen root-cause analysis
+13. recommendation
+14. risk assessment
+15. refund proposal
+16. logistics escalation
+17. human approval if required
+18. customer response
+19. audit log
+20. analytics update
+
+23. PRESENTATION MESSAGE
+Do NOT say:
+"We built an AI chatbot."
+
+Say:
+"Existing support systems often treat tickets as isolated conversations. ResolveAI treats every ticket as an investigation. It builds complete customer context across CRM, orders, billing, support history and company policies, uses Qwen to identify the root cause and determine the appropriate resolution, and uses EnterPro to orchestrate actions or escalate complex cases with full context. Every important decision is explainable, risk-aware and auditable."
+
+24. FIVE SLIDE FEATURES
+1. Autonomous Ticket Investigation
+2. Multi-Agent Resolution
+3. Explainable AI Decisions
+4. Human-in-the-Loop
+5. Intelligent Escalation
+
+25. RELIABILITY RULES
+- Never allow unrestricted LLM database writes.
+- Validate AI recommendations in backend/business rules.
+- Use risk levels.
+- Require human approval for high-impact actions.
+- Detect conflicting enterprise data.
+- Log every action.
+- Preserve complete context during escalation.
+- Use simulated data when real enterprise integrations are unavailable.
+- Never expose hidden chain-of-thought.
+
+26. FINAL PRINCIPLE
+ResolveAI must not look like:
+"LLM + chat UI."
+
+It should look like:
+"Enterprise Data + Investigation + Reasoning + Workflow + Controlled Action + Human Oversight."
+
+FINAL LOOP:
+UNDERSTAND -> INVESTIGATE -> COLLECT EVIDENCE -> REASON -> FIND ROOT CAUSE -> ASSESS RISK -> DECIDE -> ACT/ESCALATE -> EXPLAIN -> AUDIT -> LEARN
