@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Bot, User, Sparkles, CheckCircle2, ShieldAlert, Cpu, Lock, RefreshCw } from 'lucide-react';
+import { Send, Bot, User, MessageSquare, Sparkles, CheckCircle2, ShieldAlert, Cpu, Lock, RefreshCw, PlayCircle } from 'lucide-react';
 
 export default function CustomerChat({ onTicketCreated }) {
   const [inputMessage, setInputMessage] = useState('');
@@ -12,6 +12,7 @@ export default function CustomerChat({ onTicketCreated }) {
     }
   ]);
   const [executionSteps, setExecutionSteps] = useState([]);
+  const [selectedDemoId, setSelectedDemoId] = useState(null);
 
   const DEMO_CASES = [
     {
@@ -46,6 +47,7 @@ export default function CustomerChat({ onTicketCreated }) {
       text = demoCase.text;
       customerId = demoCase.customer_id;
       customerName = demoCase.name;
+      setSelectedDemoId(demoCase.id);
     }
 
     if (!text.trim() || loading) return;
@@ -137,38 +139,42 @@ export default function CustomerChat({ onTicketCreated }) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div className="chat-page-enter mx-auto grid max-w-6xl grid-cols-1 gap-6 px-4 py-8 lg:grid-cols-12 lg:gap-8">
       
       {/* Left Chat Console */}
-      <div className="lg:col-span-7 flex flex-col h-[650px] glass-panel rounded-2xl border border-slate-800 shadow-2xl overflow-hidden">
+      <div className="flex h-[min(680px,calc(100vh-8rem))] min-h-[560px] flex-col overflow-hidden rounded-2xl border border-blue-500/20 bg-slate-950/70 shadow-2xl shadow-slate-950/40 lg:col-span-7">
         
         {/* Chat Header */}
-        <div className="p-4 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+        <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/90 p-5">
+          <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-blue-500/30 bg-blue-600/20">
                 <Bot className="w-5 h-5 text-blue-400" />
               </div>
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border-2 border-slate-900"></span>
+              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-emerald-400"></span>
             </div>
             <div>
-              <h3 className="font-bold text-sm text-slate-100 flex items-center gap-1.5">
+              <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-100">
                 ResolveAI Customer Support
-                <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">Live</span>
+                <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">Live</span>
               </h3>
-              <p className="text-xs text-slate-400">Autonomous Multi-Agent Intelligence</p>
+              <p className="mt-0.5 text-[11px] text-slate-400">Autonomous Multi-Agent Intelligence</p>
             </div>
+          </div>
+          <div className="hidden items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500 sm:flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+            Ready to assist
           </div>
         </div>
 
         {/* Messages Body */}
-        <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-950/40">
+        <div className="flex-1 space-y-4 overflow-y-auto bg-slate-950/40 p-5">
           {messages.map((m, idx) => (
             <div
               key={idx}
-              className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`chat-message-enter flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`max-w-[80%] rounded-2xl p-4 shadow-lg ${
+              <div className={`max-w-[86%] rounded-2xl p-4 shadow-lg sm:max-w-[80%] ${
                 m.sender === 'user'
                   ? 'bg-blue-600 text-white rounded-br-none'
                   : 'glass-panel text-slate-100 border-slate-800 rounded-bl-none'
@@ -201,7 +207,7 @@ export default function CustomerChat({ onTicketCreated }) {
           ))}
 
           {loading && (
-            <div className="flex items-center space-x-2 text-slate-400 text-xs italic p-3 glass-panel rounded-xl max-w-[60%]">
+            <div className="chat-message-enter flex max-w-[80%] items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 p-3 text-xs italic text-slate-400">
               <RefreshCw className="w-4 h-4 animate-spin text-blue-400" />
               <span>Multi-Agent Engine investigating customer request...</span>
             </div>
@@ -209,36 +215,46 @@ export default function CustomerChat({ onTicketCreated }) {
         </div>
 
         {/* Input Bar */}
-        <div className="p-3 bg-slate-900 border-t border-slate-800 flex items-center space-x-2">
+        <div className="border-t border-slate-800 bg-slate-900 p-4">
+          <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <MessageSquare className="h-3.5 w-3.5 text-blue-400" />
+            Customer complaint
+          </div>
+          <div className="flex items-center gap-2">
           <input
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Type your complaint here or select a Demo Case on the right..."
-            className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
+            placeholder="Describe the customer issue or choose a demo scenario..."
+            aria-label="Customer complaint"
+            className="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-xs text-slate-100 transition-colors placeholder:text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           />
           <button
             onClick={() => handleSend()}
             disabled={loading || !inputMessage.trim()}
-            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold text-xs flex items-center space-x-1.5 transition-all shadow-md shadow-blue-600/20"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-3 text-xs font-semibold text-white shadow-md shadow-blue-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400/60 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span>Send</span>
             <Send className="w-3.5 h-3.5" />
           </button>
+          </div>
         </div>
 
       </div>
 
       {/* Right Column: Demo Cases & Pipeline Monitor */}
-      <div className="lg:col-span-5 flex flex-col space-y-4">
+      <div className="flex flex-col gap-5 lg:col-span-5">
         
         {/* Preset Demo Cases Buttons */}
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
-          <h3 className="font-extrabold text-sm text-slate-100 flex items-center gap-2">
+        <div className="glass-panel space-y-4 rounded-2xl border border-slate-800 p-5">
+          <div>
+          <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-100">
             <Sparkles className="w-4 h-4 text-indigo-400" />
             <span>Select Track 2 Demo Scenario</span>
           </h3>
+          <p className="mt-1 pl-6 text-[11px] leading-relaxed text-slate-500">Run a known customer issue through the live autonomous support pipeline.</p>
+          </div>
 
           <div className="space-y-2">
             {DEMO_CASES.map((d) => (
@@ -246,33 +262,43 @@ export default function CustomerChat({ onTicketCreated }) {
                 key={d.id}
                 onClick={() => handleSend(d)}
                 disabled={loading}
-                className="w-full text-left p-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/40 text-xs transition-all group"
+                className={`group w-full rounded-xl border p-4 text-left text-xs transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 ${selectedDemoId === d.id ? 'border-indigo-400/60 bg-indigo-950/30 shadow-md shadow-indigo-950/20' : 'border-slate-800 bg-slate-900/80 hover:border-indigo-500/40'}`}
               >
-                <div className="flex items-center justify-between font-bold text-slate-200 mb-0.5">
-                  <span className="group-hover:text-indigo-300">{d.title}</span>
-                  <span className="text-[10px] text-slate-400 font-normal">{d.name}</span>
+                <div className="flex items-start gap-3">
+                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-[10px] font-extrabold ${selectedDemoId === d.id ? 'border-indigo-400/40 bg-indigo-500/20 text-indigo-200' : 'border-slate-700 bg-slate-950 text-slate-500'}`}>
+                    {d.id.replace('demo', '')}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3 font-bold text-slate-200">
+                      <span className="group-hover:text-indigo-300">{d.title.replace(/^Demo \d+: /, '')}</span>
+                      <span className="shrink-0 text-[10px] font-normal text-slate-400">{d.name}</span>
+                    </div>
+                    <p className="mt-1 truncate text-[11px] italic text-slate-400">"{d.text}"</p>
+                  </div>
+                  <PlayCircle className={`mt-1 h-4 w-4 shrink-0 ${selectedDemoId === d.id ? 'text-indigo-300' : 'text-slate-600 group-hover:text-indigo-300'}`} />
                 </div>
-                <p className="text-[11px] text-slate-400 italic truncate">"{d.text}"</p>
               </button>
             ))}
           </div>
         </div>
 
         {/* Live Execution Steps Monitor */}
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800">
-          <h3 className="font-bold text-sm text-slate-100 flex items-center gap-2 mb-3">
+        <div className="glass-panel rounded-2xl border border-slate-800 p-5">
+          <h3 className="mb-4 flex items-center gap-2 text-sm font-extrabold text-slate-100">
             <Cpu className="w-4 h-4 text-blue-400" />
             <span>Autonomous Pipeline Monitor</span>
           </h3>
 
           {executionSteps.length === 0 ? (
-            <div className="p-6 text-center border border-dashed border-slate-800 rounded-xl bg-slate-900/30 text-xs text-slate-400">
-              Click any demo scenario button above to watch ResolveAI run in real time.
+            <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/30 p-7 text-center text-xs text-slate-400">
+              <Cpu className="mx-auto mb-3 h-7 w-7 text-slate-600" />
+              <p className="font-semibold text-slate-300">Pipeline monitor is standing by</p>
+              <p className="mx-auto mt-1 max-w-xs leading-relaxed text-slate-500">Select a demo scenario above to watch ResolveAI process it in real time.</p>
             </div>
           ) : (
             <div className="space-y-2.5">
               {executionSteps.map((step, idx) => (
-                <div key={idx} className="p-2.5 rounded-xl border text-xs bg-slate-900/60 border-slate-800">
+                <div key={idx} className="pipeline-step-enter rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-xs">
                   <div className="flex items-center justify-between font-bold text-slate-200">
                     <span className="flex items-center gap-2">
                       {step.status === 'done' ? (
