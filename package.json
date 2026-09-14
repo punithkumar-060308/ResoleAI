@@ -4,7 +4,7 @@
   "description": "ResolveAI — Autonomous Customer Support Intelligence Platform",
   "private": true,
   "scripts": {
-    "build": "npm --prefix client run build",
+    "build": "npm --prefix client install && npm --prefix client run build",
     "start": "node server/src/index.js",
     "start:server": "npm --prefix server start",
     "dev:server": "npm --prefix server run dev",
@@ -12,3 +12,4 @@
     "build:client": "npm --prefix client run build"
   }
 }
+
