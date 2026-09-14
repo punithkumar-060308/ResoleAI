@@ -37,53 +37,53 @@ export default function AnalyticsHub() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <div className="analytics-page-enter mx-auto max-w-7xl space-y-8 px-4 py-8">
       
       {/* Analytics Header */}
-      <div className="glass-panel p-6 rounded-2xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="glass-panel rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/90 via-slate-900/70 to-blue-950/15 p-6">
         <div>
-          <div className="flex items-center space-x-2 text-xs font-semibold text-blue-400 mb-1 uppercase tracking-wider">
+          <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-blue-400">
             <BarChart3 className="w-4 h-4" />
             <span>Support Intelligence Platform Analytics</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-100">Customer Experience & Operational Intelligence</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-50 sm:text-3xl">Customer Experience & Operational Intelligence</h1>
+          <p className="mt-2 max-w-3xl text-xs leading-relaxed text-slate-400">
             Analyze first-contact resolution rates, retention risk signals, logistics bottlenecks, and root cause distributions.
           </p>
         </div>
       </div>
 
       {/* Customer Experience KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800">
-          <p className="text-xs text-slate-400 font-medium">First Contact Resolution (FCR)</p>
-          <h3 className="text-2xl font-bold text-emerald-400 mt-1">{data?.kpis?.first_contact_resolution_rate || '76%'}</h3>
-          <p className="text-[11px] text-slate-400 mt-2">Cases resolved without follow-up ticket</p>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="glass-panel-hover glass-panel analytics-stagger flex min-h-[150px] flex-col justify-between rounded-2xl border border-slate-800 p-5" style={{ '--stagger-delay': '60ms' }}>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">First Contact Resolution (FCR)</p>
+          <h3 className="mt-2 text-3xl font-extrabold tracking-tight text-emerald-400">{data?.kpis?.first_contact_resolution_rate || '76%'}</h3>
+          <p className="mt-3 text-[11px] leading-relaxed text-slate-400">Cases resolved without follow-up ticket</p>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800">
-          <p className="text-xs text-slate-400 font-medium">Repeat Contact Rate</p>
-          <h3 className="text-2xl font-bold text-amber-400 mt-1">{data?.kpis?.repeat_contact_rate || '14%'}</h3>
-          <p className="text-[11px] text-slate-400 mt-2">Driven by legacy bot auto-closures</p>
+        <div className="glass-panel-hover glass-panel analytics-stagger flex min-h-[150px] flex-col justify-between rounded-2xl border border-slate-800 p-5" style={{ '--stagger-delay': '120ms' }}>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Repeat Contact Rate</p>
+          <h3 className="mt-2 text-3xl font-extrabold tracking-tight text-amber-400">{data?.kpis?.repeat_contact_rate || '14%'}</h3>
+          <p className="mt-3 text-[11px] leading-relaxed text-slate-400">Driven by legacy bot auto-closures</p>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800">
-          <p className="text-xs text-slate-400 font-medium">AI Auto-Resolution Rate</p>
-          <h3 className="text-2xl font-bold text-blue-400 mt-1">{data?.kpis?.ai_resolution_rate || '78%'}</h3>
-          <p className="text-[11px] text-slate-400 mt-2">Zero human intervention on low risk</p>
+        <div className="glass-panel-hover glass-panel analytics-stagger flex min-h-[150px] flex-col justify-between rounded-2xl border border-slate-800 p-5" style={{ '--stagger-delay': '180ms' }}>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">AI Auto-Resolution Rate</p>
+          <h3 className="mt-2 text-3xl font-extrabold tracking-tight text-blue-400">{data?.kpis?.ai_resolution_rate || '78%'}</h3>
+          <p className="mt-3 text-[11px] leading-relaxed text-slate-400">Zero human intervention on low risk</p>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800">
-          <p className="text-xs text-slate-400 font-medium">Logistics SLA Breaches</p>
-          <h3 className="text-2xl font-bold text-rose-400 mt-1">{data?.kpis?.sla_breaches_detected || 19}</h3>
-          <p className="text-[11px] text-slate-400 mt-2">67% originating from SwiftLogistics</p>
+        <div className="glass-panel-hover glass-panel analytics-stagger flex min-h-[150px] flex-col justify-between rounded-2xl border border-slate-800 p-5" style={{ '--stagger-delay': '240ms' }}>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Logistics SLA Breaches</p>
+          <h3 className="mt-2 text-3xl font-extrabold tracking-tight text-rose-400">{data?.kpis?.sla_breaches_detected || 19}</h3>
+          <p className="mt-3 text-[11px] leading-relaxed text-slate-400">67% originating from SwiftLogistics</p>
         </div>
       </div>
 
       {/* Intelligence Spotlight Card */}
-      <div className="bg-gradient-to-r from-blue-950/60 via-indigo-950/40 to-slate-950 border-2 border-blue-500/40 p-6 rounded-2xl shadow-2xl flex items-start space-x-4">
-        <div className="p-3.5 rounded-2xl bg-blue-600/20 text-blue-400 border border-blue-500/30">
-          <Lightbulb className="w-6 h-6 animate-pulse" />
+      <div className="analytics-section-enter flex items-start gap-4 rounded-2xl border border-blue-500/30 bg-gradient-to-r from-blue-950/60 via-indigo-950/40 to-slate-950 p-6 shadow-xl shadow-blue-950/20">
+        <div className="shrink-0 rounded-2xl border border-blue-500/30 bg-blue-600/20 p-3.5 text-blue-400">
+          <Lightbulb className="h-6 w-6" />
         </div>
         <div>
           <span className="text-[10px] font-extrabold uppercase text-blue-400 tracking-wider">Key Intelligence Insight Spotlight</span>
@@ -97,14 +97,14 @@ export default function AnalyticsHub() {
       </div>
 
       {/* Retention Risk Signals Section */}
-      <div className="glass-panel p-6 rounded-2xl border border-amber-500/30 space-y-4">
-        <h3 className="font-extrabold text-sm text-slate-100 border-b border-slate-800 pb-3 flex items-center gap-2">
+      <div className="analytics-section-enter glass-panel space-y-4 rounded-2xl border border-amber-500/30 p-6">
+        <h3 className="flex items-center gap-2 border-b border-slate-800 pb-3 text-sm font-extrabold text-slate-100">
           <ShieldAlert className="w-4 h-4 text-amber-400" />
           <span>Customer Retention Risk Signals</span>
         </h3>
 
         <div className="space-y-3">
-          {data?.retention_risk_signals?.map((sig, idx) => (
+          {data?.retention_risk_signals?.length ? data.retention_risk_signals.map((sig, idx) => (
             <div key={idx} className="p-4 rounded-xl bg-amber-950/20 border border-amber-500/30 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <span className="font-extrabold text-slate-100">{sig.customer}</span>
@@ -114,24 +114,26 @@ export default function AnalyticsHub() {
                 {sig.risk_level}
               </span>
             </div>
-          ))}
+          )) : (
+            <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/30 p-8 text-center text-xs text-slate-500">No retention risk signals are currently reported.</div>
+          )}
         </div>
       </div>
 
       {/* Charts Grid 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
         
         {/* Ticket Volume & AI Resolution Trend */}
-        <div className="lg:col-span-7 glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-          <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-            <h3 className="font-extrabold text-sm text-slate-100 flex items-center gap-2">
+        <div className="analytics-section-enter glass-panel space-y-4 rounded-2xl border border-slate-800 p-6 lg:col-span-7">
+          <div className="flex items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-100">
               <TrendingUp className="w-4 h-4 text-emerald-400" />
               <span>Weekly Ticket Volume & AI Auto-Resolution</span>
             </h3>
             <span className="text-xs text-emerald-400 font-bold">78% Auto-Resolved</span>
           </div>
 
-          <div className="h-64 w-full">
+          <div className="h-64 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={volumeTrendData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -146,16 +148,16 @@ export default function AnalyticsHub() {
         </div>
 
         {/* Carrier SLA Breach Distribution */}
-        <div className="lg:col-span-5 glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-          <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-            <h3 className="font-extrabold text-sm text-slate-100 flex items-center gap-2">
+        <div className="analytics-section-enter glass-panel space-y-4 rounded-2xl border border-slate-800 p-6 lg:col-span-5">
+          <div className="flex items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-100">
               <Truck className="w-4 h-4 text-rose-400" />
               <span>Logistics Carrier SLA Breaches</span>
             </h3>
           </div>
 
           <div className="space-y-4 pt-2">
-            {data?.carrier_breakdown?.map((item, idx) => (
+            {data?.carrier_breakdown?.length ? data.carrier_breakdown.map((item, idx) => (
               <div key={idx} className="space-y-1.5 text-xs">
                 <div className="flex justify-between font-semibold">
                   <span className="text-slate-200">{item.carrier}</span>
@@ -168,24 +170,24 @@ export default function AnalyticsHub() {
                   ></div>
                 </div>
               </div>
-            ))}
+            )) : <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/30 p-8 text-center text-xs text-slate-500">No carrier SLA breakdown is currently available.</div>}
           </div>
         </div>
 
       </div>
 
       {/* Charts Grid 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
         
         {/* Common Root Causes */}
-        <div className="lg:col-span-6 glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-          <h3 className="font-extrabold text-sm text-slate-100 border-b border-slate-800 pb-3 flex items-center gap-2">
+        <div className="analytics-section-enter glass-panel space-y-4 rounded-2xl border border-slate-800 p-6 lg:col-span-6">
+          <h3 className="flex items-center gap-2 border-b border-slate-800 pb-3 text-sm font-extrabold text-slate-100">
             <Zap className="w-4 h-4 text-amber-400" />
             <span>Top Identified Root Causes</span>
           </h3>
 
           <div className="space-y-3 text-xs">
-            {data?.root_causes?.map((rc, idx) => (
+            {data?.root_causes?.length ? data.root_causes.map((rc, idx) => (
               <div key={idx} className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
                 <div>
                   <h4 className="font-bold text-slate-100">{rc.cause}</h4>
@@ -193,26 +195,26 @@ export default function AnalyticsHub() {
                 </div>
                 <span className="text-sm font-extrabold text-blue-400 font-mono">{rc.percentage}%</span>
               </div>
-            ))}
+            )) : <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/30 p-8 text-center text-xs text-slate-500">No root causes are currently reported.</div>}
           </div>
         </div>
 
         {/* Department Escalations */}
-        <div className="lg:col-span-6 glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-          <h3 className="font-extrabold text-sm text-slate-100 border-b border-slate-800 pb-3 flex items-center gap-2">
+        <div className="analytics-section-enter glass-panel space-y-4 rounded-2xl border border-slate-800 p-6 lg:col-span-6">
+          <h3 className="flex items-center gap-2 border-b border-slate-800 pb-3 text-sm font-extrabold text-slate-100">
             <ShieldCheck className="w-4 h-4 text-indigo-400" />
             <span>Department Escalation Destinations</span>
           </h3>
 
           <div className="space-y-3 text-xs">
-            {data?.department_escalations?.map((dept, idx) => (
+            {data?.department_escalations?.length ? data.department_escalations.map((dept, idx) => (
               <div key={idx} className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
                 <span className="font-semibold text-slate-200">{dept.department}</span>
                 <span className="px-2.5 py-1 rounded-full text-xs font-mono font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                   {dept.count} Escalations
                 </span>
               </div>
-            ))}
+            )) : <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/30 p-8 text-center text-xs text-slate-500">No department escalations are currently reported.</div>}
           </div>
         </div>
 
